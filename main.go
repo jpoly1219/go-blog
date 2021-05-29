@@ -1,32 +1,63 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
-func home(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	switch r.Method {
-	case "GET":
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"message": "GET called"}`))
-	case "POST":
-		w.WriteHeader(http.StatusCreated)
-		w.Write([]byte(`{"message": "POST called"}`))
-	case "PUT":
-		w.WriteHeader(http.StatusAccepted)
-		w.Write([]byte(`{"message": "PUT called"}`))
-	case "DELETE":
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"message": "DELETE called"}`))
-	default:
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte(`{"message": "not found}`))
+type Post struct {
+	Id      string `json:"Id"`
+	Title   string `json:"Title"`
+	Author  string `json:"Author"`
+	Content string `json:"Content"`
+}
+
+var Posts = make([]Post, 0)
+
+func returnAllPosts(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("returning all posts...")
+	json.NewEncoder(w).Encode(Posts)
+}
+
+func returnSinglePost(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	keys := vars["id"]
+
+	for _, post := range Posts {
+		if post.Id == keys {
+			json.NewEncoder(w).Encode(post)
+		}
+		if post.Id != keys {
+			w.Write([]byte(`{"message": "post not found"}`))
+			break
+		}
 	}
 }
 
+func createNewPost(w http.ResponseWriter, r *http.Request) {
+	reqBody, _ := ioutil.ReadAll(r.Body)
+	var newPost Post
+	json.Unmarshal(reqBody, &newPost)
+	Posts = append(Posts, newPost)
+	json.NewEncoder(w).Encode(newPost)
+}
+
 func main() {
-	http.HandleFunc("/", home)
-	log.Fatal(http.ListenAndServe(":8090", nil))
+	Posts = append(
+		Posts,
+		Post{Id: "1", Title: "Post1", Author: "Author1", Content: "Content1"},
+		Post{Id: "2", Title: "Post2", Author: "Author2", Content: "Content2"},
+		Post{Id: "3", Title: "Post3", Author: "Author1", Content: "Content3"},
+	)
+
+	r := mux.NewRouter()
+	r.HandleFunc("/posts", returnAllPosts)
+	r.HandleFunc("/posts/{id}", returnSinglePost)
+	r.HandleFunc("/post", createNewPost).Methods(http.MethodPost)
+	log.Fatal(http.ListenAndServe(":8090", r))
 }
