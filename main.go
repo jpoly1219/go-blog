@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -40,11 +39,11 @@ func returnSinglePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func createNewPost(w http.ResponseWriter, r *http.Request) {
-	reqBody, _ := ioutil.ReadAll(r.Body)
 	var newPost Post
-	json.Unmarshal(reqBody, &newPost)
+	json.NewDecoder(r.Body).Decode(&newPost)
 	Posts = append(Posts, newPost)
 	json.NewEncoder(w).Encode(newPost)
+	fmt.Println(Posts)
 }
 
 func main() {
