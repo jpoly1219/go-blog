@@ -31,10 +31,6 @@ func returnSinglePost(w http.ResponseWriter, r *http.Request) {
 		if post.Id == keys {
 			json.NewEncoder(w).Encode(post)
 		}
-		if post.Id != keys {
-			w.Write([]byte(`{"message": "post not found"}`))
-			break
-		}
 	}
 }
 
@@ -43,6 +39,20 @@ func createNewPost(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(&newPost)
 	Posts = append(Posts, newPost)
 	json.NewEncoder(w).Encode(newPost)
+	fmt.Println(Posts)
+}
+
+func deletePost(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	keys := vars["id"]
+
+	for i, post := range Posts {
+		if post.Id == keys {
+			fmt.Println(keys)
+			Posts = append(Posts[:(i)], Posts[i+1:]...)
+			json.NewEncoder(w).Encode(post)
+		}
+	}
 	fmt.Println(Posts)
 }
 
@@ -56,7 +66,8 @@ func main() {
 
 	r := mux.NewRouter()
 	r.HandleFunc("/posts", returnAllPosts)
-	r.HandleFunc("/posts/{id}", returnSinglePost)
+	r.HandleFunc("/posts/{id}", returnSinglePost).Methods(http.MethodGet)
+	r.HandleFunc("/posts/{id}", deletePost).Methods(http.MethodDelete)
 	r.HandleFunc("/post", createNewPost).Methods(http.MethodPost)
 	log.Fatal(http.ListenAndServe(":8090", r))
 }
