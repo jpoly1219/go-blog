@@ -10,7 +10,9 @@ A blogging web application for practicing web development with Go.
   - User authentication with JWT
   - Users who aren't logged in can view posts, but cannot write new posts.
   - Only users who are logged in can view their profile pages.
-- GET retrieves posts.
-- POST writes new posts.
-- PUT updates posts.
-- DELETE deletes posts.
+- SQL database to store all posts and user info.
+- REST API
+  - GET retrieves posts.
+  - POST writes new posts.
+  - PUT updates posts.
+  - DELETE deletes posts.
