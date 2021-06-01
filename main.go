@@ -13,8 +13,8 @@ import (
 )
 
 func main() {
-	models.Posts = append(
-		models.Posts,
+	controllers.Posts = append(
+		controllers.Posts,
 		models.Post{Id: "1", Title: "Post1", Author: "Author1", Content: "Content1"},
 		models.Post{Id: "2", Title: "Post2", Author: "Author2", Content: "Content2"},
 		models.Post{Id: "3", Title: "Post3", Author: "Author1", Content: "Content3"},
