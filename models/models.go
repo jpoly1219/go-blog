@@ -6,5 +6,3 @@ type Post struct {
 	Author  string `json:"Author"`
 	Content string `json:"Content"`
 }
-
-var Posts = make([]Post, 0)
