@@ -11,10 +11,9 @@ import (
 )
 
 func ReturnAllPosts(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("returning all posts...")
 	var posts = make([]models.Post, 0)
 
-	results, err := models.Db.Query("SELECT * FROM posts")
+	results, err := models.Db.Query("SELECT * FROM posts;")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -35,38 +34,80 @@ func ReturnSinglePost(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	keys := vars["id"]
 
-	var posts = make([]models.Post, 0)
+	results, err := models.Db.Query(fmt.Sprintf("SELECT * FROM posts WHERE id = %s;", keys))
+	if err != nil {
+		panic(err.Error())
+	}
 
-	for _, post := range posts {
-		if post.Id == keys {
-			json.NewEncoder(w).Encode(post)
+	var post models.Post
+	for results.Next() {
+		err = results.Scan(&post.Id, &post.Title, &post.Author, &post.Content)
+		if err != nil {
+			panic(err.Error())
 		}
 	}
+
+	json.NewEncoder(w).Encode(post)
 }
 
 func CreateNewPost(w http.ResponseWriter, r *http.Request) {
-	var newPost models.Post
+	var newPost models.PostReqPost
 	json.NewDecoder(r.Body).Decode(&newPost)
 
-	var posts = make([]models.Post, 0)
+	newPostStr := fmt.Sprintf(
+		"INSERT INTO posts(title, author, content) VALUES ('%s', '%s', '%s');",
+		newPost.Title, newPost.Author, newPost.Content,
+	)
 
-	posts = append(posts, newPost)
+	results, err := models.Db.Query(newPostStr)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	for results.Next() {
+		err = results.Scan(&newPost.Title, &newPost.Author, &newPost.Content)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+
 	json.NewEncoder(w).Encode(newPost)
-	fmt.Println(posts)
+}
+
+func UpdatePost(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	keys := vars["id"]
+
+	var updatedPost models.Post
+	json.NewDecoder(r.Body).Decode(&updatedPost)
+
+	updatedPostStr := fmt.Sprintf(
+		"UPDATE posts SET title = '%s', content = '%s' WHERE id = %s",
+		updatedPost.Title, updatedPost.Content, keys,
+	)
+
+	results, err := models.Db.Query(updatedPostStr)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	var post models.Post
+	for results.Next() {
+		err = results.Scan(&post.Id, &post.Title, &post.Author, &post.Content)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+
+	json.NewEncoder(w).Encode(post)
 }
 
 func DeletePost(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	keys := vars["id"]
 
-	var posts = make([]models.Post, 0)
-
-	for i, post := range posts {
-		if post.Id == keys {
-			fmt.Println(keys)
-			posts = append(posts[:(i)], posts[i+1:]...)
-			json.NewEncoder(w).Encode(post)
-		}
+	_, err := models.Db.Query(fmt.Sprintf("DELETE FROM posts WHERE id = %s", keys))
+	if err != nil {
+		panic(err.Error())
 	}
-	fmt.Println(posts)
 }

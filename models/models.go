@@ -12,3 +12,9 @@ type Post struct {
 	Author  string `json:"Author"`
 	Content string `json:"Content"`
 }
+
+type PostReqPost struct {
+	Title   string `json:"Title"`
+	Author  string `json:"Author"`
+	Content string `json:"Content"`
+}

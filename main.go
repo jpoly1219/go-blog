@@ -41,6 +41,7 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/posts", controllers.ReturnAllPosts)
 	r.HandleFunc("/posts/{id}", controllers.ReturnSinglePost).Methods(http.MethodGet)
+	r.HandleFunc("/posts/{id}", controllers.UpdatePost).Methods(http.MethodPut)
 	r.HandleFunc("/posts/{id}", controllers.DeletePost).Methods(http.MethodDelete)
 	r.HandleFunc("/post", controllers.CreateNewPost).Methods(http.MethodPost)
 	log.Fatal(http.ListenAndServe(":8090", r))
