@@ -26,26 +26,17 @@ func getEnvVar(key string) string {
 }
 
 func main() {
-	controllers.Posts = append(
-		controllers.Posts,
-		models.Post{Id: "1", Title: "Post1", Author: "Author1", Content: "Content1"},
-		models.Post{Id: "2", Title: "Post2", Author: "Author2", Content: "Content2"},
-		models.Post{Id: "3", Title: "Post3", Author: "Author1", Content: "Content3"},
-	)
-
 	dbUsername := getEnvVar("DBUSERNAME")
 	dbPassword := getEnvVar("DBPASSWORD")
-
 	dbSource := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/posts", dbUsername, dbPassword)
-	fmt.Println(dbSource)
 
-	Db, err := sql.Open("mysql", dbSource)
-
+	var err error
+	models.Db, err = sql.Open("mysql", dbSource)
 	if err != nil {
 		panic(err.Error())
 	}
 
-	defer Db.Close()
+	defer models.Db.Close()
 
 	r := mux.NewRouter()
 	r.HandleFunc("/posts", controllers.ReturnAllPosts)
