@@ -17,3 +17,6 @@
 # Config files
 *.env
 *.txt
+
+# go build binaries
+main
