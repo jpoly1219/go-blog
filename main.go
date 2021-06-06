@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/jpoly1219/go-blog/auth"
 	"github.com/jpoly1219/go-blog/controllers"
 	"github.com/jpoly1219/go-blog/models"
 
@@ -28,7 +29,7 @@ func getEnvVar(key string) string {
 func main() {
 	dbUsername := getEnvVar("DBUSERNAME")
 	dbPassword := getEnvVar("DBPASSWORD")
-	dbSource := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/posts", dbUsername, dbPassword)
+	dbSource := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/goblog", dbUsername, dbPassword)
 
 	var err error
 	models.Db, err = sql.Open("mysql", dbSource)
@@ -44,5 +45,10 @@ func main() {
 	r.HandleFunc("/posts/{id}", controllers.UpdatePost).Methods(http.MethodPut)
 	r.HandleFunc("/posts/{id}", controllers.DeletePost).Methods(http.MethodDelete)
 	r.HandleFunc("/post", controllers.CreateNewPost).Methods(http.MethodPost)
+
+	authR := r.PathPrefix("/auth").Subrouter()
+	authR.HandleFunc("/signup", auth.SignUp).Methods(http.MethodPost)
+	authR.HandleFunc("/login", auth.LogIn).Methods(http.MethodPost)
+
 	log.Fatal(http.ListenAndServe(":8090", r))
 }

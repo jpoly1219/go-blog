@@ -51,27 +51,27 @@ func ReturnSinglePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateNewPost(w http.ResponseWriter, r *http.Request) {
-	var newPost models.PostReqPost
-	json.NewDecoder(r.Body).Decode(&newPost)
+	var post models.Post
+	json.NewDecoder(r.Body).Decode(&post)
 
-	newPostStr := fmt.Sprintf(
+	queryStr := fmt.Sprintf(
 		"INSERT INTO posts(title, author, content) VALUES ('%s', '%s', '%s');",
-		newPost.Title, newPost.Author, newPost.Content,
+		post.Title, post.Author, post.Content,
 	)
 
-	results, err := models.Db.Query(newPostStr)
+	results, err := models.Db.Query(queryStr)
 	if err != nil {
 		panic(err.Error())
 	}
 
 	for results.Next() {
-		err = results.Scan(&newPost.Title, &newPost.Author, &newPost.Content)
+		err = results.Scan(&post.Title, &post.Author, &post.Content)
 		if err != nil {
 			panic(err.Error())
 		}
 	}
 
-	json.NewEncoder(w).Encode(newPost)
+	json.NewEncoder(w).Encode(post)
 }
 
 func UpdatePost(w http.ResponseWriter, r *http.Request) {
@@ -81,12 +81,12 @@ func UpdatePost(w http.ResponseWriter, r *http.Request) {
 	var updatedPost models.Post
 	json.NewDecoder(r.Body).Decode(&updatedPost)
 
-	updatedPostStr := fmt.Sprintf(
+	QueryStr := fmt.Sprintf(
 		"UPDATE posts SET title = '%s', content = '%s' WHERE id = %s",
 		updatedPost.Title, updatedPost.Content, keys,
 	)
 
-	results, err := models.Db.Query(updatedPostStr)
+	results, err := models.Db.Query(QueryStr)
 	if err != nil {
 		panic(err.Error())
 	}
