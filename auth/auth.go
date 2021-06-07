@@ -3,8 +3,14 @@ package auth
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
+	"os"
+	"strconv"
+	"time"
 
+	"github.com/dgrijalva/jwt-go"
+	"github.com/joho/godotenv"
 	"github.com/jpoly1219/go-blog/models"
 )
 
@@ -62,8 +68,30 @@ func LogIn(w http.ResponseWriter, r *http.Request) {
 	}
 	if qo.email == user.Email && qo.password == user.Password {
 		fmt.Println("Match!")
+		userIdInt, _ := strconv.Atoi(qo.id)
+		token := generateToken(userIdInt)
+		json.NewEncoder(w).Encode(token)
 	} else {
 		fmt.Println("No Match!")
 	}
+}
 
+func generateToken(userId int) string {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatalln("Error loading .env file.")
+	}
+	jwtSecretKey := os.Getenv("JWTSECRETKEY")
+
+	accessTokenClaims := jwt.MapClaims{}
+	accessTokenClaims["authorized"] = true
+	accessTokenClaims["user_id"] = userId
+	accessTokenClaims["exp"] = time.Now().Add(time.Minute * 15).Unix()
+	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessTokenClaims)
+
+	accessTokenString, err := accessToken.SignedString([]byte(jwtSecretKey))
+	if err != nil {
+		panic(err.Error())
+	}
+	return accessTokenString
 }
