@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	"github.com/jpoly1219/go-blog/models"
 )
@@ -68,30 +69,53 @@ func LogIn(w http.ResponseWriter, r *http.Request) {
 	}
 	if qo.email == user.Email && qo.password == user.Password {
 		fmt.Println("Match!")
+
 		userIdInt, _ := strconv.Atoi(qo.id)
-		token := generateToken(userIdInt)
-		json.NewEncoder(w).Encode(token)
+		tokenStruct := generateToken(userIdInt)
+		tokens := map[string]string{
+			"accessToken":  tokenStruct.AccessToken,
+			"refreshToken": tokenStruct.RefreshToken,
+		}
+		json.NewEncoder(w).Encode(tokens)
 	} else {
 		fmt.Println("No Match!")
 	}
 }
 
-func generateToken(userId int) string {
+func generateToken(userId int) *models.Token {
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatalln("Error loading .env file.")
 	}
-	jwtSecretKey := os.Getenv("JWTSECRETKEY")
+	accessSecretKey := os.Getenv("ACCESSSECRETKEY")
+	refreshSecretKey := os.Getenv("REFRESHSECRETKEY")
+
+	tokenInfo := &models.Token{}
+	tokenInfo.AccessUuid = uuid.NewString()
+	tokenInfo.AccessExpire = time.Now().Add(time.Minute * 15).Unix()
+	tokenInfo.RefreshUuid = uuid.NewString()
+	tokenInfo.RefreshExpire = time.Now().Add(time.Hour * 24 * 7).Unix()
 
 	accessTokenClaims := jwt.MapClaims{}
 	accessTokenClaims["authorized"] = true
+	accessTokenClaims["access_uuid"] = tokenInfo.AccessUuid
 	accessTokenClaims["user_id"] = userId
-	accessTokenClaims["exp"] = time.Now().Add(time.Minute * 15).Unix()
+	accessTokenClaims["exp"] = tokenInfo.AccessExpire
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessTokenClaims)
-
-	accessTokenString, err := accessToken.SignedString([]byte(jwtSecretKey))
+	tokenInfo.AccessToken, err = accessToken.SignedString([]byte(accessSecretKey))
 	if err != nil {
 		panic(err.Error())
 	}
-	return accessTokenString
+
+	refreshTokenClaims := jwt.MapClaims{}
+	refreshTokenClaims["refresh_uuid"] = uuid.NewString()
+	refreshTokenClaims["user_id"] = userId
+	refreshTokenClaims["exp"] = time.Now().Add(time.Hour * 24 * 7).Unix()
+	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshTokenClaims)
+	tokenInfo.RefreshToken, err = refreshToken.SignedString([]byte(refreshSecretKey))
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return tokenInfo
 }
