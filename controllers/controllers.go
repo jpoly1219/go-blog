@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/jpoly1219/go-blog/auth"
 	"github.com/jpoly1219/go-blog/models"
 
 	"github.com/gorilla/mux"
@@ -51,6 +52,12 @@ func ReturnSinglePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateNewPost(w http.ResponseWriter, r *http.Request) {
+	err := auth.CheckTokenValidity(r)
+	if err != nil {
+		json.NewEncoder(w).Encode("Unauthorized")
+		return
+	}
+
 	var post models.Post
 	json.NewDecoder(r.Body).Decode(&post)
 
@@ -75,6 +82,12 @@ func CreateNewPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdatePost(w http.ResponseWriter, r *http.Request) {
+	err := auth.CheckTokenValidity(r)
+	if err != nil {
+		json.NewEncoder(w).Encode("Unauthorized")
+		return
+	}
+
 	vars := mux.Vars(r)
 	keys := vars["id"]
 
@@ -103,10 +116,16 @@ func UpdatePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeletePost(w http.ResponseWriter, r *http.Request) {
+	err := auth.CheckTokenValidity(r)
+	if err != nil {
+		json.NewEncoder(w).Encode("Unauthorized")
+		return
+	}
+
 	vars := mux.Vars(r)
 	keys := vars["id"]
 
-	_, err := models.Db.Query(fmt.Sprintf("DELETE FROM posts WHERE id = %s", keys))
+	_, err = models.Db.Query(fmt.Sprintf("DELETE FROM posts WHERE id = %s", keys))
 	if err != nil {
 		panic(err.Error())
 	}
