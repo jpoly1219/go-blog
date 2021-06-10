@@ -3,15 +3,14 @@ package auth
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
-	"github.com/joho/godotenv"
 	"github.com/jpoly1219/go-blog/models"
 )
 
@@ -23,7 +22,6 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		"INSERT INTO users(name, email, username, password) VALUES('%s', '%s', '%s', '%s')",
 		user.Name, user.Email, user.Username, user.Password,
 	)
-
 	results, err := models.Db.Query(queryStr)
 	if err != nil {
 		panic(err.Error())
@@ -43,13 +41,10 @@ func LogIn(w http.ResponseWriter, r *http.Request) {
 	var user models.User
 	json.NewDecoder(r.Body).Decode(&user)
 
-	fmt.Println(user.Id)
-
 	queryStr := fmt.Sprintf(
 		"SELECT * FROM users WHERE email = '%s' AND password = '%s'",
 		user.Email, user.Password,
 	)
-
 	results, err := models.Db.Query(queryStr)
 	if err != nil {
 		panic(err.Error())
@@ -58,15 +53,14 @@ func LogIn(w http.ResponseWriter, r *http.Request) {
 	type queryOutput struct {
 		id, name, email, username, password string
 	}
-
 	var qo queryOutput
-
 	for results.Next() {
 		err = results.Scan(&qo.id, &qo.name, &qo.email, &qo.username, &qo.password)
 		if err != nil {
 			panic(err.Error())
 		}
 	}
+
 	if qo.email == user.Email && qo.password == user.Password {
 		fmt.Println("Match!")
 
@@ -83,10 +77,8 @@ func LogIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func generateToken(userId int) *models.Token {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatalln("Error loading .env file.")
-	}
+	var err error
+
 	accessSecretKey := os.Getenv("ACCESSSECRETKEY")
 	refreshSecretKey := os.Getenv("REFRESHSECRETKEY")
 
@@ -118,4 +110,46 @@ func generateToken(userId int) *models.Token {
 	}
 
 	return tokenInfo
+}
+
+func ExtractToken(r *http.Request) string {
+	tokenHeaderStr := r.Header.Get("Authorization")
+	strSlice := strings.Split(tokenHeaderStr, " ")
+	var tokenStr string
+	if len(strSlice) == 2 {
+		tokenStr = strSlice[1]
+	}
+
+	fmt.Print(tokenStr)
+	return tokenStr
+}
+
+func VerifyToken(r *http.Request) (*jwt.Token, error) {
+	tokenStr := ExtractToken(r)
+
+	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+
+		return []byte(os.Getenv("ACCESSSECRETKEY")), nil
+	})
+	if err != nil {
+		fmt.Println("Failed to verify token.")
+		return nil, err
+	}
+
+	return token, nil
+}
+
+func CheckTokenValidity(r *http.Request) error {
+	token, err := VerifyToken(r)
+	if err != nil {
+		return err
+	}
+	if !token.Valid {
+		fmt.Println("Invalid token.")
+		return err
+	}
+	return nil
 }
