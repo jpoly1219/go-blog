@@ -2,6 +2,7 @@ package auth
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -24,13 +25,13 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	)
 	results, err := models.Db.Query(queryStr)
 	if err != nil {
-		panic(err.Error())
+		fmt.Println("query failed")
 	}
 
 	for results.Next() {
 		err = results.Scan(&user.Name, &user.Email, &user.Username, &user.Password)
 		if err != nil {
-			panic(err.Error())
+			fmt.Println("scan failed; check the number of values in destination and the number of columns")
 		}
 	}
 
@@ -47,7 +48,7 @@ func LogIn(w http.ResponseWriter, r *http.Request) {
 	)
 	results, err := models.Db.Query(queryStr)
 	if err != nil {
-		panic(err.Error())
+		fmt.Println("query failed")
 	}
 
 	type queryOutput struct {
@@ -57,7 +58,7 @@ func LogIn(w http.ResponseWriter, r *http.Request) {
 	for results.Next() {
 		err = results.Scan(&qo.id, &qo.name, &qo.email, &qo.username, &qo.password)
 		if err != nil {
-			panic(err.Error())
+			fmt.Println("scan failed; check the number of values in destination and the number of columns")
 		}
 	}
 
@@ -65,7 +66,10 @@ func LogIn(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Match!")
 
 		userIdInt, _ := strconv.Atoi(qo.id)
-		tokenStruct := generateToken(userIdInt)
+		tokenStruct, err := generateToken(userIdInt)
+		if err != nil {
+			fmt.Println("failed to generate token")
+		}
 		tokens := map[string]string{
 			"accessToken":  tokenStruct.AccessToken,
 			"refreshToken": tokenStruct.RefreshToken,
@@ -73,10 +77,11 @@ func LogIn(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(tokens)
 	} else {
 		fmt.Println("No Match!")
+		json.NewEncoder(w).Encode("This user does not exist.")
 	}
 }
 
-func generateToken(userId int) *models.Token {
+func generateToken(userId int) (*models.Token, error) {
 	var err error
 
 	accessSecretKey := os.Getenv("ACCESSSECRETKEY")
@@ -96,7 +101,7 @@ func generateToken(userId int) *models.Token {
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessTokenClaims)
 	tokenInfo.AccessToken, err = accessToken.SignedString([]byte(accessSecretKey))
 	if err != nil {
-		panic(err.Error())
+		return nil, errors.New("failed to generate access token")
 	}
 
 	refreshTokenClaims := jwt.MapClaims{}
@@ -106,10 +111,10 @@ func generateToken(userId int) *models.Token {
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshTokenClaims)
 	tokenInfo.RefreshToken, err = refreshToken.SignedString([]byte(refreshSecretKey))
 	if err != nil {
-		panic(err.Error())
+		return nil, errors.New("failed to generate refresh token")
 	}
 
-	return tokenInfo
+	return tokenInfo, nil
 }
 
 func ExtractToken(r *http.Request) string {
@@ -120,7 +125,7 @@ func ExtractToken(r *http.Request) string {
 		tokenStr = strSlice[1]
 	}
 
-	fmt.Print(tokenStr)
+	fmt.Println(tokenStr)
 	return tokenStr
 }
 

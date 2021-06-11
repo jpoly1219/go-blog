@@ -34,7 +34,7 @@ func main() {
 	var err error
 	models.Db, err = sql.Open("mysql", dbSource)
 	if err != nil {
-		panic(err.Error())
+		log.Fatalln("Failed to connect to database.")
 	}
 
 	defer models.Db.Close()

@@ -94,12 +94,12 @@ func UpdatePost(w http.ResponseWriter, r *http.Request) {
 	var updatedPost models.Post
 	json.NewDecoder(r.Body).Decode(&updatedPost)
 
-	QueryStr := fmt.Sprintf(
+	queryStr := fmt.Sprintf(
 		"UPDATE posts SET title = '%s', content = '%s' WHERE id = %s",
 		updatedPost.Title, updatedPost.Content, keys,
 	)
 
-	results, err := models.Db.Query(QueryStr)
+	results, err := models.Db.Query(queryStr)
 	if err != nil {
 		panic(err.Error())
 	}
