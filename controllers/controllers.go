@@ -27,7 +27,7 @@ func ReturnAllPosts(w http.ResponseWriter, r *http.Request) {
 		}
 		posts = append(posts, post)
 	}
-
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	json.NewEncoder(w).Encode(posts)
 }
 
