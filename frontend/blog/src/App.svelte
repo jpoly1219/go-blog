@@ -1,30 +1,31 @@
 <script>
-	export let name;
+	import { onMount } from "svelte";
+	import { each } from "svelte/internal";
+
+	const apiURL = "http://jpoly1219devbox.xyz:8090/posts";
+	let data = [];
+
+	onMount(async () => {
+		const response = await fetch(apiURL);
+		data = await response.json();
+	});
 </script>
 
 <main>
-	<h1>Hello {name}!</h1>
-	<p>Visit the <a href="https://svelte.dev/tutorial">Svelte tutorial</a> to learn how to build Svelte apps.</p>
+	{#each data as item}
+		<div>
+			<p>{item.title}</p>
+			<p>{item.author}</p>
+			<p>{item.content}</p>
+		</div>
+	{/each}
 </main>
 
 <style>
-	main {
-		text-align: center;
-		padding: 1em;
-		max-width: 240px;
-		margin: 0 auto;
-	}
-
-	h1 {
-		color: #ff3e00;
-		text-transform: uppercase;
-		font-size: 4em;
-		font-weight: 100;
-	}
-
-	@media (min-width: 640px) {
-		main {
-			max-width: none;
-		}
+	div {
+		border: solid 2px grey;
+		border-radius: 30px;
+		margin: 1em;
+		padding: 10px;
 	}
 </style>
