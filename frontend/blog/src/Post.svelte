@@ -1,7 +1,7 @@
 <script>
     export let post;
 </script>
-<div class="container mx-auto px-96 py-10 flex flex-col">
+<div class="container mx-auto px-96 pb-10 flex flex-col">
     <div class="border-b-2">
         <h2 class="text-2xl font-medium text-gray-900 mt-4 mb-4">
             {post.title}
