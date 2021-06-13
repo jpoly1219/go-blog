@@ -1,6 +1,5 @@
 <script>
 	import { onMount } from "svelte";
-	import { each } from "svelte/internal";
 	import Navbar from "./Navbar.svelte";
 	import Post from "./Post.svelte";
 
@@ -20,9 +19,8 @@
 	{/each}
 </main>
 
-<style>
-	main {
-		display: grid;
-		grid-template-columns: 15% 15% 40% 15% 15%;
-	}
+<style global>
+	@tailwind base;
+	@tailwind components;
+	@tailwind utilities;
 </style>
