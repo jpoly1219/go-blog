@@ -1,7 +1,10 @@
 <script>
 	import { onMount } from "svelte";
-	import Navbar from "./Navbar.svelte";
-	import Post from "./Post.svelte";
+	import Home from "./Home.svelte";
+	import Login from "./Login.svelte";
+	import { Router, Link, Route } from "svelte-routing";
+
+	export let url = "";
 
 	const apiURL = "http://jpoly1219devbox.xyz:8090/posts";
 	let data = [];
@@ -12,12 +15,10 @@
 	});
 </script>
 
-<main>
-	<Navbar/>
-	{#each data as item}
-		<Post post={item}/>
-	{/each}
-</main>
+<Router url="{url}">
+	<Route path="/"><Home posts={data}/></Route>
+	<Route path="/login"><Login/></Route>
+</Router>
 
 <style global>
 	@tailwind base;
