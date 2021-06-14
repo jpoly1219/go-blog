@@ -3,7 +3,7 @@ import Navbar from "./Navbar.svelte";
 
 </script>
 
-<Navbar/>
+<Navbar on:pressed/>
 <div class="bg-white w-full rounded-lg border-gray-900">
-    
+    <span>Login Page</span>
 </div>
