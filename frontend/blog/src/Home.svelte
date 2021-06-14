@@ -4,7 +4,7 @@
     export let posts;
 </script>
 
-<Navbar/>
+<Navbar on:pressed/>
 {#each posts as item}
     <Post post={item}/>
 {/each}
