@@ -29,7 +29,6 @@
 	{:else}
 		<Notfound/>
 	{/if}
-
 </main>
 
 <style global>
