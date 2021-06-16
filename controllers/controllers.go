@@ -12,6 +12,7 @@ import (
 )
 
 func ReturnAllPosts(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("returning all posts...")
 	var posts = make([]models.Post, 0)
 
 	results, err := models.Db.Query("SELECT * FROM posts;")
