@@ -35,10 +35,12 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	json.NewEncoder(w).Encode(user)
 }
 
 func LogIn(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("login json received...")
 	var user models.User
 	json.NewDecoder(r.Body).Decode(&user)
 
@@ -74,9 +76,12 @@ func LogIn(w http.ResponseWriter, r *http.Request) {
 			"accessToken":  tokenStruct.AccessToken,
 			"refreshToken": tokenStruct.RefreshToken,
 		}
+
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		json.NewEncoder(w).Encode(tokens)
 	} else {
 		fmt.Println("No Match!")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		json.NewEncoder(w).Encode("This user does not exist.")
 	}
 }
