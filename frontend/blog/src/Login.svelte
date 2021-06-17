@@ -13,8 +13,8 @@
 
         const options = {
             method: 'POST',
-            headers: {
-                "Content-Type": "application/json"
+            header: {
+                "Content-Type": "text/plain"
             },
             body: JSON.stringify(loginDetails)
         };
@@ -42,7 +42,6 @@
             <p class="text-sm font-extralight">
                 Don't have an account yet? <a href="/" class="text-blue-400">Sign up</a> today.
             </p>
-            <p>{result}</p>
         </form>
     </div>
 </div>
