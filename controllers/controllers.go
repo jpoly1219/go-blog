@@ -28,6 +28,7 @@ func ReturnAllPosts(w http.ResponseWriter, r *http.Request) {
 		}
 		posts = append(posts, post)
 	}
+
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	json.NewEncoder(w).Encode(posts)
 }
@@ -49,10 +50,16 @@ func ReturnSinglePost(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	json.NewEncoder(w).Encode(post)
 }
 
 func CreateNewPost(w http.ResponseWriter, r *http.Request) {
+	auth.HandleCors(w, r)
+	if r.Method == "OPTIONS" {
+		return
+	}
+
 	err := auth.CheckTokenValidity(r)
 	if err != nil {
 		json.NewEncoder(w).Encode("Unauthorized")
@@ -83,6 +90,11 @@ func CreateNewPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdatePost(w http.ResponseWriter, r *http.Request) {
+	auth.HandleCors(w, r)
+	if r.Method == "OPTIONS" {
+		return
+	}
+
 	err := auth.CheckTokenValidity(r)
 	if err != nil {
 		json.NewEncoder(w).Encode("Unauthorized")
@@ -117,6 +129,11 @@ func UpdatePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeletePost(w http.ResponseWriter, r *http.Request) {
+	auth.HandleCors(w, r)
+	if r.Method == "OPTIONS" {
+		return
+	}
+
 	err := auth.CheckTokenValidity(r)
 	if err != nil {
 		json.NewEncoder(w).Encode("Unauthorized")
