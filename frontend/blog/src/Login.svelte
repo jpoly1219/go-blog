@@ -12,16 +12,16 @@
         }
 
         const options = {
-            method: 'POST',
-            header: {
-                "Content-Type": "text/plain"
-            },
-            body: JSON.stringify(loginDetails)
+            method: "POST",
+            body: loginDetails,
+            headers: {
+                "Content-Type": "application/json"
+            }
         };
         const res = await fetch("http://jpoly1219devbox.xyz:8090/auth/login", options);
         const json = await res.json();
         result = JSON.stringify(json);
-        alert(result);
+        console.log(result);
     }
 </script>
 
