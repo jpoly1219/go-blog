@@ -40,15 +40,15 @@ func main() {
 	defer models.Db.Close()
 
 	r := mux.NewRouter()
-	r.HandleFunc("/posts", controllers.ReturnAllPosts)
+	r.HandleFunc("/posts", controllers.ReturnAllPosts).Methods(http.MethodGet)
 	r.HandleFunc("/posts/{id}", controllers.ReturnSinglePost).Methods(http.MethodGet)
-	r.HandleFunc("/posts/{id}", controllers.UpdatePost).Methods(http.MethodPut)
-	r.HandleFunc("/posts/{id}", controllers.DeletePost).Methods(http.MethodDelete)
-	r.HandleFunc("/post", controllers.CreateNewPost).Methods(http.MethodPost)
+	r.HandleFunc("/posts/{id}", controllers.UpdatePost).Methods(http.MethodOptions, http.MethodPut)
+	r.HandleFunc("/posts/{id}", controllers.DeletePost).Methods(http.MethodOptions, http.MethodDelete)
+	r.HandleFunc("/post", controllers.CreateNewPost).Methods(http.MethodOptions, http.MethodPost)
 
 	authR := r.PathPrefix("/auth").Subrouter()
-	authR.HandleFunc("/signup", auth.SignUp).Methods("POST")
-	authR.HandleFunc("/login", auth.LogIn).Methods("POST")
+	authR.HandleFunc("/signup", auth.SignUp).Methods(http.MethodOptions, http.MethodPost)
+	authR.HandleFunc("/login", auth.LogIn).Methods(http.MethodOptions, http.MethodPost)
 
 	log.Fatal(http.ListenAndServe(":8090", r))
 }
