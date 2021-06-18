@@ -9,8 +9,8 @@
 	let data = [];
 
 	onMount(async () => {
-		const response = await fetch(apiURL);
-		data = await response.json();
+		const res = await fetch(apiURL);
+		data = await res.json();
 	});
 
 	let currentPage = "home";
