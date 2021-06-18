@@ -15,7 +15,18 @@ import (
 	"github.com/jpoly1219/go-blog/models"
 )
 
+func HandleCors(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Authorization")
+}
+
 func SignUp(w http.ResponseWriter, r *http.Request) {
+	HandleCors(w, r)
+	if r.Method == "OPTIONS" {
+		return
+	}
+
 	var user models.User
 	json.NewDecoder(r.Body).Decode(&user)
 
@@ -40,6 +51,11 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 }
 
 func LogIn(w http.ResponseWriter, r *http.Request) {
+	HandleCors(w, r)
+	if r.Method == "OPTIONS" {
+		return
+	}
+
 	fmt.Println("login json received...")
 	var user models.User
 	json.NewDecoder(r.Body).Decode(&user)
@@ -77,11 +93,9 @@ func LogIn(w http.ResponseWriter, r *http.Request) {
 			"refreshToken": tokenStruct.RefreshToken,
 		}
 
-		w.Header().Set("Access-Control-Allow-Origin", "*")
 		json.NewEncoder(w).Encode(tokens)
 	} else {
 		fmt.Println("No Match!")
-		w.Header().Set("Access-Control-Allow-Origin", "*")
 		json.NewEncoder(w).Encode("This user does not exist.")
 	}
 }
