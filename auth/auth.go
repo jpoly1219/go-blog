@@ -55,7 +55,6 @@ func LogIn(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "OPTIONS" {
 		return
 	}
-
 	fmt.Println("login json received...")
 	var user models.User
 	json.NewDecoder(r.Body).Decode(&user)
@@ -79,12 +78,14 @@ func LogIn(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("scan failed; check the number of values in destination and the number of columns")
 		}
 	}
+	fmt.Println(results)
 
 	if qo.email == user.Email && qo.password == user.Password {
 		fmt.Println("Match!")
 
 		userIdInt, _ := strconv.Atoi(qo.id)
-		tokenStruct, err := generateToken(userIdInt)
+		userName := qo.name
+		tokenStruct, err := generateToken(userName, userIdInt)
 		if err != nil {
 			fmt.Println("failed to generate token")
 		}
@@ -100,7 +101,7 @@ func LogIn(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func generateToken(userId int) (*models.Token, error) {
+func generateToken(userName string, userId int) (*models.Token, error) {
 	var err error
 
 	accessSecretKey := os.Getenv("ACCESSSECRETKEY")
@@ -115,6 +116,7 @@ func generateToken(userId int) (*models.Token, error) {
 	accessTokenClaims := jwt.MapClaims{}
 	accessTokenClaims["authorized"] = true
 	accessTokenClaims["access_uuid"] = tokenInfo.AccessUuid
+	accessTokenClaims["user_name"] = userName
 	accessTokenClaims["user_id"] = userId
 	accessTokenClaims["exp"] = tokenInfo.AccessExpire
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessTokenClaims)
@@ -125,6 +127,7 @@ func generateToken(userId int) (*models.Token, error) {
 
 	refreshTokenClaims := jwt.MapClaims{}
 	refreshTokenClaims["refresh_uuid"] = uuid.NewString()
+	accessTokenClaims["user_name"] = userName
 	refreshTokenClaims["user_id"] = userId
 	refreshTokenClaims["exp"] = time.Now().Add(time.Hour * 24 * 7).Unix()
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshTokenClaims)
