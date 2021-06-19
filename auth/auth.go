@@ -78,7 +78,6 @@ func LogIn(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("scan failed; check the number of values in destination and the number of columns")
 		}
 	}
-	fmt.Println(results)
 
 	if qo.email == user.Email && qo.password == user.Password {
 		fmt.Println("Match!")

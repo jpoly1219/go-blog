@@ -1,10 +1,16 @@
 <script>
-    import Navbar from "./Navbar.svelte"
+    import { onMount } from "svelte"
     import Post from "./Post.svelte"
-    export let posts;
+    
+    const apiURL = "http://jpoly1219devbox.xyz:8090/posts";
+	let data = [];
+
+	onMount(async () => {
+		const res = await fetch(apiURL);
+		data = await res.json();
+	});
 </script>
 
-<Navbar on:pressed/>
-{#each posts as item}
+{#each data as item}
     <Post post={item}/>
 {/each}

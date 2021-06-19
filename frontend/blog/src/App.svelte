@@ -1,34 +1,22 @@
 <script>
-	import { onMount } from "svelte";
 	import Home from "./Home.svelte";
 	import Login from "./Login.svelte";
 	import Signup from "./Signup.svelte"
 	import Notfound from "./Notfound.svelte"
+	import Navbar from "./Navbar.svelte";
+	import { activePage } from "./stores.js"
 
-	const apiURL = "http://jpoly1219devbox.xyz:8090/posts";
-	let data = [];
-
-	onMount(async () => {
-		const res = await fetch(apiURL);
-		data = await res.json();
-	});
-
-	let currentPage = "home";
-	function handlePressed(event) {
-		currentPage = event.detail;
-	}
+	const pageMap = {
+		home: Home,
+		login: Login,
+		signup: Signup,
+		notfound: Notfound
+	};
 </script>
 
 <main>
-	{#if currentPage == "home"}
-		<Home on:pressed={handlePressed} posts={data}/>
-	{:else if currentPage == "login"}
-		<Login on:pressed={handlePressed}/>
-	{:else if currentPage == "signup"}
-		<Signup on:pressed={handlePressed}/>
-	{:else}
-		<Notfound/>
-	{/if}
+	<Navbar/>
+	<svelte:component this={pageMap[$activePage]}/>
 </main>
 
 <style global>

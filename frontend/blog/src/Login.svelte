@@ -1,11 +1,9 @@
 <script>
-    import { beforeUpdate } from "svelte"
-    import Navbar from "./Navbar.svelte";
-    import { authenticated, accessToken } from "./stores.js"
+    import { authenticated, accessToken, activePage } from "./stores.js"
 
     let email = "";
     let password = "";
-    let result = null;
+    // let result = null;
 
     async function submit() {
         let loginDetails = {
@@ -22,21 +20,19 @@
         };
         const res = await fetch("http://jpoly1219devbox.xyz:8090/auth/login", options);
         const json = await res.json();
-        result = JSON.stringify(json);
+        // result = JSON.stringify(json);
         accessToken.set(json.accessToken);
-    }
 
-    let username = "";
-    beforeUpdate(() => {
         if ($accessToken != undefined && $accessToken != "") {
             authenticated.set(true);
-            username = JSON.parse(window.atob($accessToken.split(".")[1])).user_name
+            activePage.set("home");
         }
-    });
-
+        else {
+            alert("login failed.")
+        }
+    }
 </script>
 
-<Navbar on:pressed username={username}/>
 <div class="container mx-auto items-center flex flex-col text-gray-900">
     <div class="bg-white p-16 rounded-lg border-gray-900 shadow-lg my-44">
         <h2 class="text-2xl font-medium text-center mb-20">Welcome back.</h2>
@@ -51,7 +47,7 @@
                 </button>
             </div>
             <p class="text-sm font-extralight">
-                Don't have an account yet? <a href="/" class="text-blue-400">Sign up</a> today.
+                Don't have an account yet? <span on:click={() => activePage.set("signup")} class="text-blue-400 cursor-pointer">Sign up</span> today.
             </p>
         </form>
     </div>
