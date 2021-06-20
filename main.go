@@ -49,6 +49,7 @@ func main() {
 	authR := r.PathPrefix("/auth").Subrouter()
 	authR.HandleFunc("/signup", auth.SignUp).Methods(http.MethodOptions, http.MethodPost)
 	authR.HandleFunc("/login", auth.LogIn).Methods(http.MethodOptions, http.MethodPost)
+	authR.HandleFunc("/refresh", auth.Refresh).Methods(http.MethodOptions, http.MethodPost)
 
 	log.Fatal(http.ListenAndServe(":8090", r))
 }
