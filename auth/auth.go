@@ -96,8 +96,12 @@ func LogIn(w http.ResponseWriter, r *http.Request) {
 			Value:    refreshToken,
 		}
 
+		responseJSON := map[string]string{
+			"accessToken": accessToken,
+		}
+
 		http.SetCookie(w, &cookie)
-		json.NewEncoder(w).Encode(accessToken)
+		json.NewEncoder(w).Encode(responseJSON)
 	} else {
 		fmt.Println("No Match!")
 		json.NewEncoder(w).Encode("This user does not exist.")
@@ -240,6 +244,10 @@ func Refresh(w http.ResponseWriter, r *http.Request) {
 		Value:    refreshToken,
 	}
 
+	responseJSON := map[string]string{
+		"accessToken": accessToken,
+	}
+
 	http.SetCookie(w, &cookie)
-	json.NewEncoder(w).Encode(accessToken)
+	json.NewEncoder(w).Encode(responseJSON)
 }
