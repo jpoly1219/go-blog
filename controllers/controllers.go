@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/jpoly1219/go-blog/auth"
 	"github.com/jpoly1219/go-blog/models"
@@ -60,7 +61,7 @@ func CreateNewPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := auth.CheckTokenValidity(r)
+	_, err := auth.CheckTokenValidity(r, os.Getenv("ACCESSSECRETKEY"))
 	if err != nil {
 		json.NewEncoder(w).Encode("Unauthorized")
 		return
@@ -95,7 +96,7 @@ func UpdatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := auth.CheckTokenValidity(r)
+	_, err := auth.CheckTokenValidity(r, os.Getenv("ACCESSSECRETKEY"))
 	if err != nil {
 		json.NewEncoder(w).Encode("Unauthorized")
 		return
@@ -134,7 +135,7 @@ func DeletePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := auth.CheckTokenValidity(r)
+	_, err := auth.CheckTokenValidity(r, os.Getenv("ACCESSSECRETKEY"))
 	if err != nil {
 		json.NewEncoder(w).Encode("Unauthorized")
 		return
