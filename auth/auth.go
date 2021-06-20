@@ -88,19 +88,23 @@ func LogIn(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Println("failed to generate token")
 		}
-		tokens := map[string]string{
-			"accessToken":  tokenStruct.AccessToken,
-			"refreshToken": tokenStruct.RefreshToken,
+		accessToken := tokenStruct.AccessToken
+		refreshToken := tokenStruct.RefreshToken
+		cookie := http.Cookie{
+			HttpOnly: true,
+			Name:     "refreshToken",
+			Value:    refreshToken,
 		}
 
-		json.NewEncoder(w).Encode(tokens)
+		http.SetCookie(w, &cookie)
+		json.NewEncoder(w).Encode(accessToken)
 	} else {
 		fmt.Println("No Match!")
 		json.NewEncoder(w).Encode("This user does not exist.")
 	}
 }
 
-func generateToken(userName string, userId int) (*models.Token, error) {
+func generateToken(userName interface{}, userId interface{}) (*models.Token, error) {
 	var err error
 
 	accessSecretKey := os.Getenv("ACCESSSECRETKEY")
@@ -126,7 +130,7 @@ func generateToken(userName string, userId int) (*models.Token, error) {
 
 	refreshTokenClaims := jwt.MapClaims{}
 	refreshTokenClaims["refresh_uuid"] = uuid.NewString()
-	accessTokenClaims["user_name"] = userName
+	refreshTokenClaims["user_name"] = userName
 	refreshTokenClaims["user_id"] = userId
 	refreshTokenClaims["exp"] = time.Now().Add(time.Hour * 24 * 7).Unix()
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshTokenClaims)
@@ -150,7 +154,7 @@ func ExtractToken(r *http.Request) string {
 	return tokenStr
 }
 
-func VerifyToken(r *http.Request) (*jwt.Token, error) {
+func VerifyToken(r *http.Request, secretKey string) (*jwt.Token, error) {
 	tokenStr := ExtractToken(r)
 
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
@@ -158,7 +162,7 @@ func VerifyToken(r *http.Request) (*jwt.Token, error) {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
-		return []byte(os.Getenv("ACCESSSECRETKEY")), nil
+		return []byte(secretKey), nil
 	})
 	if err != nil {
 		fmt.Println("Failed to verify token.")
@@ -168,14 +172,74 @@ func VerifyToken(r *http.Request) (*jwt.Token, error) {
 	return token, nil
 }
 
-func CheckTokenValidity(r *http.Request) error {
-	token, err := VerifyToken(r)
+func CheckTokenValidity(r *http.Request, secretKey string) (*jwt.Token, error) {
+	token, err := VerifyToken(r, secretKey)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if !token.Valid {
 		fmt.Println("Invalid token.")
-		return err
+		return nil, err
 	}
-	return nil
+	return token, nil
+}
+
+func Refresh(w http.ResponseWriter, r *http.Request) {
+	HandleCors(w, r)
+	if r.Method == "OPTIONS" {
+		return
+	}
+	fmt.Println("refresh request received...")
+
+	// get refreshToken from cookie
+	var refreshToken string
+	c, err := r.Cookie("refreshToken")
+	if err != nil {
+		w.Write([]byte("error in reading cookie : " + err.Error() + "\n"))
+	} else {
+		refreshToken = c.Value
+	}
+
+	// verify refreshToken and check its validity
+	refreshSecretKey := os.Getenv("REFRESHSECRETKEY")
+	token, err := jwt.Parse(refreshToken, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+
+		return []byte(refreshSecretKey), nil
+	})
+	if err != nil {
+		fmt.Println("Failed to verify token.")
+		return
+	}
+	if !token.Valid {
+		fmt.Println("Invalid token.")
+		return
+	}
+
+	var userName interface{}
+	var userId interface{}
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		userName = claims["user_name"]
+		userId = claims["user_id"]
+	} else {
+		fmt.Println(err)
+	}
+
+	// generate new access and refresh tokens
+	tokenStruct, err := generateToken(userName, userId)
+	if err != nil {
+		fmt.Println("failed to generate token")
+	}
+	accessToken := tokenStruct.AccessToken
+	refreshToken = tokenStruct.RefreshToken
+	cookie := http.Cookie{
+		HttpOnly: true,
+		Name:     "refreshToken",
+		Value:    refreshToken,
+	}
+
+	http.SetCookie(w, &cookie)
+	json.NewEncoder(w).Encode(accessToken)
 }
