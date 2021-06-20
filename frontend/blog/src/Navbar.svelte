@@ -5,13 +5,17 @@ import { beforeUpdate } from "svelte";
 
     function logout() {
         authenticated.set(false);
+        accessToken.set("");
         activePage.set("home");
     }
 
     let username = "";
     beforeUpdate(() => {
         if ($authenticated == true) {
-            username = JSON.parse(window.atob($accessToken.split(".")[1])).user_name
+            let payloadB64 = $accessToken.split(".")[1]
+            username = JSON.parse(window.atob(payloadB64)).user_name
+            console.log(JSON.parse(window.atob(payloadB64)).exp)
+            setTimeout(() => console.log(JSON.parse(window.atob(payloadB64)).exp), 2000)
         }
     });
 </script>
