@@ -9,8 +9,12 @@
 		const res = await fetch(apiURL);
 		data = await res.json();
 	});
+
+	function loadSinglePost() {
+		
+	}
 </script>
 
 {#each data as item}
-    <Post post={item}/>
+    <Post post={item} on:click={loadSinglePost}/>
 {/each}
