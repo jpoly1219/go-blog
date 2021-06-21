@@ -1,9 +1,9 @@
 <script>
-    import { authenticated, accessToken, activePage } from "./stores.js"
+    import { authenticated, accessToken, activePage, expiration } from "./stores.js"
 
-    let email = "";
-    let password = "";
-    // let result = null;
+    let email = ""
+    let password = ""
+    // let result = null
 
     async function submit() {
         let loginDetails = {
@@ -16,16 +16,21 @@
             body: JSON.stringify(loginDetails),
             headers: {
                 "Content-Type": "application/json"
-            }
-        };
-        const res = await fetch("http://jpoly1219devbox.xyz:8090/auth/login", options);
-        const json = await res.json();
-        // result = JSON.stringify(json);
-        accessToken.set(json.accessToken);
+            },
+            credentials: "include"
+        }
+        const res = await fetch("http://jpoly1219devbox.xyz:8090/auth/login", options)
+        const json = await res.json()
+        // result = JSON.stringify(json)
+        accessToken.set(json.accessToken)
+        console.log($accessToken)
 
         if ($accessToken != undefined && $accessToken != "") {
-            authenticated.set(true);
-            activePage.set("home");
+            authenticated.set(true)
+            activePage.set("home")
+            let payloadB64 = $accessToken.split(".")[1]
+            expiration.set(JSON.parse(window.atob(payloadB64)).exp)
+            console.log("expiration: " + $expiration)
         }
         else {
             alert("login failed.")
@@ -39,7 +44,7 @@
         <form on:submit|preventDefault={submit} class="flex flex-col px-30">
             <div class="flex flex-col items-stretch px-30">
                 <input bind:value={email} type="text" placeholder="Email address" class="border-b-2 py-4">
-                <input bind:value={password} type="text" placeholder="Password" class="border-b-2 py-4">
+                <input bind:value={password} type="password" placeholder="Password" class="border-b-2 py-4">
             </div>
             <div class="flex flex-col items-center my-10">
                 <button type="submit" class="border border-gray-500 rounded-lg p-3">
