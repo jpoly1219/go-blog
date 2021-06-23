@@ -3,18 +3,14 @@
     import Post from "./Post.svelte";
     
     const apiURL = "http://jpoly1219devbox.xyz:8090/posts";
-	let data = [];
+	let postList = [];
 
 	onMount(async () => {
 		const res = await fetch(apiURL)
-		data = await res.json()
+		postList = await res.json()
 	})
-
-	function loadSinglePost() {
-		
-	}
 </script>
 
-{#each data as item}
-    <Post post={item} on:click={loadSinglePost}/>
+{#each postList as post}
+    <Post post={post}/>
 {/each}
