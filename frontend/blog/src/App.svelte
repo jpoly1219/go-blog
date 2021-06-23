@@ -3,17 +3,23 @@
 	import Login from "./Login.svelte";
 	import Signup from "./Signup.svelte";
 	import Notfound from "./Notfound.svelte";
-	import Singlepost from "./Singlepost.svelte";
 	import Navbar from "./Navbar.svelte";
-	import { accessToken, activePage, expiration } from "./stores.js";
+	import Singlepost from "./Singlepost.svelte";
+	import { accessToken, activePage, expiration, isSinglePost } from "./stores.js";
 
 	const pageMap = {
 		home: Home,
 		login: Login,
 		signup: Signup,
-		notfound: Notfound,
-		singlepost: Singlepost
+		notfound: Notfound
 	};
+
+	let singlePost;
+	function loadSinglePost(event) {
+		singlePost = event.detail.post
+		console.log(singlePost)
+		isSinglePost.set(true)
+	}
 
 	function refreshTimer() {
 		if ($expiration != "") {
@@ -46,7 +52,11 @@
 
 <main>
 	<Navbar/>
-	<svelte:component this={pageMap[$activePage]}/>
+	{#if $isSinglePost == true}
+		<Singlepost singlePost={singlePost}/>
+	{:else}
+		<svelte:component this={pageMap[$activePage]} on:message={loadSinglePost}/>
+	{/if}
 </main>
 
 <style global>
