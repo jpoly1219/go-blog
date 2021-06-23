@@ -1,7 +1,6 @@
 <script>
-import { beforeUpdate } from "svelte";
-
-    import { authenticated, accessToken, activePage } from "./stores.js"
+    import { beforeUpdate } from "svelte";
+    import { authenticated, accessToken, activePage, isSinglePost } from "./stores.js"
 
     function logout() {
         authenticated.set(false)
@@ -16,23 +15,40 @@ import { beforeUpdate } from "svelte";
             username = JSON.parse(window.atob(payloadB64)).user_name
         }
     })
+
+    function homeClick() {
+        activePage.set("home")
+        isSinglePost.set(false)
+    }
+    function loginClick() {
+        activePage.set("login")
+        isSinglePost.set(false)
+    }
+    function signupClick() {
+        activePage.set("signup")
+        isSinglePost.set(false)
+    }
+    function profileClick() {
+        activePage.set("notfound")
+        isSinglePost.set(false)
+    }
 </script>
 
 <header class="sticky top-0 bg-white text-gray-600 body-font z-10">
     <div class="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center">
-        <div on:click={() => activePage.set("home")} class="flex title-font font-medium items-center text-gray-900 mb-4 md:mb-0 cursor-pointer">
+        <div on:click={homeClick} class="flex title-font font-medium items-center text-gray-900 mb-4 md:mb-0 cursor-pointer">
             <span class="ml-3 text-xl">Goblog</span>
         </div>
         <nav class="md:ml-auto flex flex-wrap item-center text-base justify-center">
             {#if $authenticated == false}
-                <button on:click={() => activePage.set("login")} class="mr-5 inline-flex items-center border border-gray-500 rounded-lg">
+                <button on:click={loginClick} class="mr-5 inline-flex items-center border border-gray-500 rounded-lg">
                     <span class="mx-3 my-2">Log in</span>
                 </button>
-                <button on:click={() => activePage.set("signup")} class="inline-flex items-center bg-blue-400 border border-blue-900 rounded-lg text-base">
+                <button on:click={signupClick} class="inline-flex items-center bg-blue-400 border border-blue-900 rounded-lg text-base">
                     <span class="mx-3 my-2 text-white">Sign up</span>
                 </button>
             {:else}
-            <div on:click={() => activePage.set("notfound")} class="flex items-center mr-5 text-base text-gray-900 cursor-pointer">
+            <div on:click={profileClick} class="flex items-center mr-5 text-base text-gray-900 cursor-pointer">
                 <span class="mx-3 my-2">{username}</span>
             </div>
                 <button on:click={logout} class="inline-flex items-center bg-blue-400 border border-blue-900 rounded-lg text-base">
