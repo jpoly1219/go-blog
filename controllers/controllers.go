@@ -35,6 +35,7 @@ func ReturnAllPosts(w http.ResponseWriter, r *http.Request) {
 }
 
 func ReturnSinglePost(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("returning one post...")
 	vars := mux.Vars(r)
 	keys := vars["id"]
 
