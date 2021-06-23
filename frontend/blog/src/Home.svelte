@@ -12,5 +12,5 @@
 </script>
 
 {#each postList as post}
-    <Post post={post}/>
+    <Post post={post} on:message/>
 {/each}
