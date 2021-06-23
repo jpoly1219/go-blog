@@ -3,6 +3,7 @@
 	import Login from "./Login.svelte";
 	import Signup from "./Signup.svelte";
 	import Notfound from "./Notfound.svelte";
+	import Singlepost from "./Singlepost.svelte";
 	import Navbar from "./Navbar.svelte";
 	import { accessToken, activePage, expiration } from "./stores.js";
 
@@ -10,7 +11,8 @@
 		home: Home,
 		login: Login,
 		signup: Signup,
-		notfound: Notfound
+		notfound: Notfound,
+		singlepost: Singlepost
 	};
 
 	function refreshTimer() {
