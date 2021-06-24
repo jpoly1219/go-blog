@@ -1,6 +1,20 @@
 <script>
-    import { isSinglePost } from "./stores"
-    export let singlePost;
+    import { onMount } from "svelte"
+    import { activePage, postId } from "./stores"
+
+    let singlePost = {
+        title: "",
+        author: "",
+        content: ""
+    }
+
+    onMount(async () => {
+        let id = $postId
+        console.log(id)
+        let apiURL = "http://jpoly1219devbox.xyz:8090/posts/" + id
+        const res = await fetch(apiURL)
+        singlePost = await res.json()
+    })
 </script>
 
 <div class="container mx-auto px-96 pb-10 flex flex-col">
@@ -15,7 +29,7 @@
             {singlePost.content}
         </p>
     </div>
-    <button type="button" on:click={() => isSinglePost.set(false)} class="border border-gray-500 rounded-lg p-3">
+    <button type="button" on:click={() => activePage.set("home")} class="border border-gray-500 rounded-lg p-3">
         <span class="mx-3 my-2">Go back to list</span>
     </button>
 </div>
