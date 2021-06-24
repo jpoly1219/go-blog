@@ -1,5 +1,5 @@
 <script>
-    import { activePage } from "./stores";
+    import { activePage } from "./stores"
 
     function signin() {
         alert("now signed up!")
