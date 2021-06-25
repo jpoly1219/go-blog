@@ -32,10 +32,10 @@ The project is meant to be kept bare-bones and minimal. I am trying not to use f
   - I thought Svelte fits the minimalist theme quite well, and works pretty well with my Go backend. Svelte also makes my frontend insanely fast.
   - I may or may not switch over to SvelteKit, but I want to stick with Svelte for the time being.
     - Frontend now starts a timer that counts until the access token expiration time, and when it does, it sends a request to the backend for a refresh token.
+  - Clicking on a post title links to a page dedicated for that single post.
 
 ## Features to work on
 - Frontend
-  - Clicking on a post title links to a page dedicated for that single post.
   - Clicking on the username after login redirects to the user profile page.
   - Posts are shortened in the homepage if they exceed around 100 words or so.
   - Pagination
