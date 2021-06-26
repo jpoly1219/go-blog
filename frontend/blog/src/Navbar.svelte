@@ -31,7 +31,7 @@
                     <span class="mx-3 my-2 text-white">Sign up</span>
                 </button>
             {:else}
-            <div on:click={() => activePage.set("notfound")} class="flex items-center mr-5 text-base text-gray-900 cursor-pointer">
+            <div on:click={() => activePage.set("profile")} class="flex items-center mr-5 text-base text-gray-900 cursor-pointer">
                 <span class="mx-3 my-2">{username}</span>
             </div>
                 <button on:click={logout} class="inline-flex items-center bg-blue-400 border border-blue-900 rounded-lg text-base">
