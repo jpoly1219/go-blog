@@ -36,7 +36,7 @@ The project is meant to be kept bare-bones and minimal. I am trying not to use f
 
 ## Features to work on
 - Frontend
-  - Clicking on the username after login redirects to the user profile page.
+  - Clicking on the username after login redirects to the user profile page. IN PROGRESS
   - Posts are shortened in the homepage if they exceed around 100 words or so.
   - Pagination
     - It's a bad idea to load every post from the database, so there needs to be a way to load x amount of posts at a time.
