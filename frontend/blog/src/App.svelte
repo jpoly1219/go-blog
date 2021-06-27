@@ -6,6 +6,7 @@
 	import Navbar from "./Navbar.svelte"
 	import Singlepost from "./Singlepost.svelte"
 	import Profile from "./Profile.svelte"
+	import Editprofile from "./Editprofile.svelte"
 	import { accessToken, activePage, expiration } from "./stores.js"
 
 	const pageMap = {
@@ -14,7 +15,8 @@
 		signup: Signup,
 		notfound: Notfound,
 		singlepost: Singlepost,
-		profile: Profile
+		profile: Profile,
+		editprofile: Editprofile
 	}
 
 	function refreshTimer() {
