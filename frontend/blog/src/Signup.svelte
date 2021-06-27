@@ -18,7 +18,7 @@
                 <input type="text" placeholder="Password" class="border-b-2 py-4">
             </div>
             <div class="flex flex-col items-center my-10">
-                <button type="submit" on:click={signin} class="border bg-blue-400 border-blue-900 rounded-lg p-3">
+                <button type="submit" on:click={signin} class="border bg-blue-400 rounded-lg p-3">
                     <span class="mx-3 my-2 text-white">Sign up</span>
                 </button>
             </div>
