@@ -46,3 +46,4 @@ The project is meant to be kept bare-bones and minimal. I am trying not to use f
   - If the user decides to log in from different devices, then the access token for one device has to be shared across other devices. This might be a better design than having to generate x amount of tokens for each device.
 - Security
   - There is no way to invalidate the access tokens if a hacker successfully steals them. The hacker has full access for 15 minutes until the token is invalidated.
+  - Passwords need to be encrypted using bcrypt.
