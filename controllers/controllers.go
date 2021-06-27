@@ -150,3 +150,87 @@ func DeletePost(w http.ResponseWriter, r *http.Request) {
 		panic(err.Error())
 	}
 }
+
+func ReturnUserData(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("returning user data...")
+	vars := mux.Vars(r)
+	keys := vars["username"]
+
+	queryStr := fmt.Sprintf("SELECT id, name, email, username FROM users WHERE username = '%s'", keys)
+	results, err := models.Db.Query(queryStr)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	var user models.OtherUser
+	for results.Next() {
+		err = results.Scan(&user.Id, &user.Name, &user.Email, &user.Username)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	json.NewEncoder(w).Encode(user)
+}
+
+func ReturnUserPosts(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("returning this user's post...")
+	vars := mux.Vars(r)
+	keys := vars["userid"]
+
+	results, err := models.Db.Query(fmt.Sprintf("SELECT * FROM posts WHERE author = %s;", keys))
+	if err != nil {
+		panic(err.Error())
+	}
+
+	var post models.Post
+	var posts []models.Post
+	for results.Next() {
+		err = results.Scan(&post.Id, &post.Title, &post.Author, &post.Content)
+		if err != nil {
+			panic(err.Error())
+		}
+		posts = append(posts, post)
+	}
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	json.NewEncoder(w).Encode(posts)
+}
+
+func EditUserData(w http.ResponseWriter, r *http.Request) {
+	auth.HandleCors(w, r)
+	if r.Method == "OPTIONS" {
+		return
+	}
+
+	_, err := auth.CheckTokenValidity(r, os.Getenv("ACCESSSECRETKEY"))
+	if err != nil {
+		json.NewEncoder(w).Encode("Unauthorized")
+		return
+	}
+
+	vars := mux.Vars(r)
+	keys := vars["username"]
+
+	var updatedUser models.User
+	json.NewDecoder(r.Body).Decode(&updatedUser)
+
+	queryStr := fmt.Sprintf(
+		"UPDATE users SET name = '%s', email = '%s', password = '%s' WHERE id = %s",
+		updatedUser.Name, updatedUser.Email, updatedUser.Password, keys,
+	)
+	results, err := models.Db.Query(queryStr)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	for results.Next() {
+		err = results.Scan(&updatedUser.Id, &updatedUser.Name, &updatedUser.Email, &updatedUser.Username, &updatedUser.Password)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+
+	json.NewEncoder(w).Encode(updatedUser)
+}
