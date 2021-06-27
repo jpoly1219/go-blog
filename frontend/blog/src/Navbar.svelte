@@ -27,14 +27,14 @@
                 <button on:click={() => activePage.set("login")} class="mr-5 inline-flex items-center border border-gray-500 rounded-lg">
                     <span class="mx-3 my-2">Log in</span>
                 </button>
-                <button on:click={() => activePage.set("signup")} class="inline-flex items-center bg-blue-400 border border-blue-900 rounded-lg text-base">
+                <button on:click={() => activePage.set("signup")} class="inline-flex items-center bg-blue-400 border rounded-lg text-base">
                     <span class="mx-3 my-2 text-white">Sign up</span>
                 </button>
             {:else}
             <div on:click={() => activePage.set("profile")} class="flex items-center mr-5 text-base text-gray-900 cursor-pointer">
                 <span class="mx-3 my-2">{username}</span>
             </div>
-                <button on:click={logout} class="inline-flex items-center bg-blue-400 border border-blue-900 rounded-lg text-base">
+                <button on:click={logout} class="inline-flex items-center bg-blue-400 border rounded-lg text-base">
                     <span class="mx-3 my-2 text-white">Log out</span>
                 </button>
             {/if}
