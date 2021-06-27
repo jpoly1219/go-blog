@@ -11,6 +11,8 @@
 	})
 </script>
 
-{#each postList as post}
-    <Post post={post} on:message/>
-{/each}
+<div class="container mx-auto w-1/3 flex flex-col">
+	{#each postList as post}
+    	<Post post={post} on:message/>
+	{/each}
+</div>
