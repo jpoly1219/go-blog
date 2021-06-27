@@ -45,6 +45,8 @@ func main() {
 	r.HandleFunc("/posts/{id}", controllers.UpdatePost).Methods(http.MethodOptions, http.MethodPut)
 	r.HandleFunc("/posts/{id}", controllers.DeletePost).Methods(http.MethodOptions, http.MethodDelete)
 	r.HandleFunc("/post", controllers.CreateNewPost).Methods(http.MethodOptions, http.MethodPost)
+	r.HandleFunc("/{username}", controllers.ReturnUserData).Methods(http.MethodGet)
+	r.HandleFunc("/{userid}/posts", controllers.ReturnUserPosts).Methods(http.MethodGet)
 
 	authR := r.PathPrefix("/auth").Subrouter()
 	authR.HandleFunc("/signup", auth.SignUp).Methods(http.MethodOptions, http.MethodPost)
