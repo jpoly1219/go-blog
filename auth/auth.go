@@ -84,7 +84,7 @@ func LogIn(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Match!")
 
 		userIdInt, _ := strconv.Atoi(qo.id)
-		userName := qo.name
+		userName := qo.username
 		tokenStruct, err := generateToken(userName, userIdInt)
 		if err != nil {
 			fmt.Println("failed to generate token")
