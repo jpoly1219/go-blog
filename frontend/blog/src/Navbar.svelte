@@ -1,11 +1,14 @@
 <script>
     import { beforeUpdate } from "svelte";
-    import { authenticated, accessToken, activePage } from "./stores.js"
+    import { authenticated, accessToken, activePage, currentUser, postId } from "./stores.js"
 
     function logout() {
         authenticated.set(false)
         accessToken.set("")
+        expiration.set("")
+        currentUser.set("")
         activePage.set("home")
+        postId.set("")
     }
 
     let username = ""
