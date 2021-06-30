@@ -1,6 +1,6 @@
 <script>
     import { beforeUpdate } from "svelte";
-    import { authenticated, accessToken, activePage, currentUser, postId } from "./stores.js"
+    import { authenticated, accessToken, activePage, currentUser, expiration, postId } from "./stores.js"
 
     function logout() {
         authenticated.set(false)
