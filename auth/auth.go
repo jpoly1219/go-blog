@@ -13,6 +13,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
 	"github.com/jpoly1219/go-blog/models"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func HandleCors(w http.ResponseWriter, r *http.Request) {
@@ -31,10 +32,17 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	var user models.User
 	json.NewDecoder(r.Body).Decode(&user)
 
+	passwordHashByte, err := bcrypt.GenerateFromPassword([]byte(user.Password), 14)
+	if err != nil {
+		fmt.Println("failed to generate password hash")
+	}
+	passwordHashStr := string(passwordHashByte)
+
 	queryStr := fmt.Sprintf(
 		"INSERT INTO users(name, email, username, password) VALUES('%s', '%s', '%s', '%s')",
-		user.Name, user.Email, user.Username, user.Password,
+		user.Name, user.Email, user.Username, passwordHashStr,
 	)
+	fmt.Println(queryStr)
 	results, err := models.Db.Query(queryStr)
 	if err != nil {
 		fmt.Println("query failed")
@@ -47,7 +55,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	// w.Header().Set("Access-Control-Allow-Origin", "jpoly1219devbox.xyz")
 	json.NewEncoder(w).Encode(user)
 }
 
@@ -61,8 +69,8 @@ func LogIn(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(&user)
 
 	queryStr := fmt.Sprintf(
-		"SELECT * FROM users WHERE email = '%s' AND password = '%s'",
-		user.Email, user.Password,
+		"SELECT * FROM users WHERE email = '%s'",
+		user.Email,
 	)
 	results, err := models.Db.Query(queryStr)
 	if err != nil {
@@ -76,16 +84,19 @@ func LogIn(w http.ResponseWriter, r *http.Request) {
 	for results.Next() {
 		err = results.Scan(&qo.id, &qo.name, &qo.email, &qo.username, &qo.password)
 		if err != nil {
-			fmt.Println("scan failed; check the number of values in destination and the number of columns")
+			fmt.Println("scan failed")
 		}
 	}
 
-	if qo.email == user.Email && qo.password == user.Password {
+	pwMatchErr := bcrypt.CompareHashAndPassword([]byte(qo.password), []byte(user.Password))
+	if qo.email == user.Email && pwMatchErr == nil {
 		fmt.Println("Match!")
 
-		userIdInt, _ := strconv.Atoi(qo.id)
-		userName := qo.username
-		tokenStruct, err := generateToken(userName, userIdInt)
+		idInt, _ := strconv.Atoi(qo.id)
+		name := qo.name
+		email := qo.email
+		username := qo.username
+		tokenStruct, err := generateToken(idInt, name, email, username)
 		if err != nil {
 			fmt.Println("failed to generate token")
 		}
@@ -111,7 +122,7 @@ func LogIn(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func generateToken(userName interface{}, userId interface{}) (*models.Token, error) {
+func generateToken(id, name, email, username interface{}) (*models.Token, error) {
 	var err error
 
 	accessSecretKey := os.Getenv("ACCESSSECRETKEY")
@@ -126,8 +137,10 @@ func generateToken(userName interface{}, userId interface{}) (*models.Token, err
 	accessTokenClaims := jwt.MapClaims{}
 	accessTokenClaims["authorized"] = true
 	accessTokenClaims["access_uuid"] = tokenInfo.AccessUuid
-	accessTokenClaims["user_name"] = userName
-	accessTokenClaims["user_id"] = userId
+	accessTokenClaims["user_id"] = id
+	accessTokenClaims["user_name"] = name
+	accessTokenClaims["user_email"] = email
+	accessTokenClaims["user_username"] = username
 	accessTokenClaims["exp"] = tokenInfo.AccessExpire
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessTokenClaims)
 	tokenInfo.AccessToken, err = accessToken.SignedString([]byte(accessSecretKey))
@@ -137,8 +150,8 @@ func generateToken(userName interface{}, userId interface{}) (*models.Token, err
 
 	refreshTokenClaims := jwt.MapClaims{}
 	refreshTokenClaims["refresh_uuid"] = uuid.NewString()
-	refreshTokenClaims["user_name"] = userName
-	refreshTokenClaims["user_id"] = userId
+	refreshTokenClaims["user_id"] = id
+	refreshTokenClaims["user_name"] = username
 	refreshTokenClaims["exp"] = time.Now().Add(time.Hour * 24 * 7).Unix()
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshTokenClaims)
 	tokenInfo.RefreshToken, err = refreshToken.SignedString([]byte(refreshSecretKey))
@@ -225,17 +238,37 @@ func Refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var userName interface{}
-	var userId interface{}
+	var refreshId, refreshUsername interface{}
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		userName = claims["user_name"]
-		userId = claims["user_id"]
+		refreshId = claims["user_id"]
+		refreshUsername = claims["user_username"]
 	} else {
 		fmt.Println(err)
 	}
 
+	// query the user and use that data as parameters for generating new tokens
+	queryStr := fmt.Sprintf(
+		"SELECT * FROM users WHERE id = '%s' AND username = '%s'",
+		refreshId, refreshUsername,
+	)
+	results, err := models.Db.Query(queryStr)
+	if err != nil {
+		fmt.Println("query failed")
+	}
+
+	type queryOutput struct {
+		id, name, email, username, password string
+	}
+	var qo queryOutput
+	for results.Next() {
+		err = results.Scan(&qo.id, &qo.name, &qo.email, &qo.username, &qo.password)
+		if err != nil {
+			fmt.Println("scan failed")
+		}
+	}
+
 	// generate new access and refresh tokens
-	tokenStruct, err := generateToken(userName, userId)
+	tokenStruct, err := generateToken(qo.id, qo.name, qo.email, qo.username)
 	if err != nil {
 		fmt.Println("failed to generate token")
 	}
