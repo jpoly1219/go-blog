@@ -18,6 +18,7 @@
         
         const res2 = await fetch("http://jpoly1219devbox.xyz:8090/"+userId+"/posts")
         postData = await res2.json()
+        console.log(postData)
 	})
 </script>
 
@@ -42,9 +43,11 @@
     </div>
     <div class="w-1/3"></div>
     <div class="container mx-auto w-1/3 flex flex-col">
-        {#each postData as post}
-            <Post post={post}/>
-        {/each}
+        {#if postData != null}
+            {#each postData as post}
+                <Post post={post}/>
+            {/each}
+        {/if}
     </div>
     <div class="w-1/3"></div>
 </div>
