@@ -1,8 +1,11 @@
 <script>
-    let fullname = "Sam Boezwinkle"
-    let username = "sam"
-    let email = "sam@gmail.com"
-    let password = "qwe123!@#"
+    import { accessToken } from "./stores.js"
+
+    let payloadB64 = $accessToken.split(".")[1]
+
+    let fullname = JSON.parse(window.atob(payloadB64)).user_name
+    let username = JSON.parse(window.atob(payloadB64)).user_username
+    let email = JSON.parse(window.atob(payloadB64)).user_email
 </script>
 
 <div class="container mx-auto w-1/3 shadow">
@@ -40,7 +43,7 @@
                 <h4 class="text-base text-gray-500 font-medium mr-52 self-center">
                     Password
                 </h4>
-                <input type="text" value={password} class="text-base py-2 flex-grow max-w-sm">
+                <input type="text" class="text-base py-2 flex-grow max-w-sm">
             </div>
             <div class="bg-gray-50 px-7 py-5 flex flex-row justify-end">
                 <button type="submit" class="inline-flex items-center bg-blue-400 border rounded-lg text-base">
