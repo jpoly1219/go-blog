@@ -33,17 +33,20 @@ The project is meant to be kept bare-bones and minimal. I am trying not to use f
   - I may or may not switch over to SvelteKit, but I want to stick with Svelte for the time being.
     - Frontend now starts a timer that counts until the access token expiration time, and when it does, it sends a request to the backend for a refresh token.
   - Clicking on a post title links to a page dedicated for that single post.
+  - Clicking on the username in the navbar after login redirects to the user profile page.
+  - Each post component shows the title, author and the content of the post.
+- Security
+  - Passwords are hashed using bcrypt.
 
 ## Features to work on
 - Frontend
-  - Clicking on the username after login redirects to the user profile page. IN PROGRESS
   - Posts are shortened in the homepage if they exceed around 100 words or so.
   - Pagination
     - It's a bad idea to load every post from the database, so there needs to be a way to load x amount of posts at a time.
     - I may have an infinitely scrolling page that loads posts as the user scrolls down.
     - Or I may just have a next page button to load set amount of posts per page.
+  - Users can write their own posts.
 - User authentication
   - If the user decides to log in from different devices, then the access token for one device has to be shared across other devices. This might be a better design than having to generate x amount of tokens for each device.
 - Security
   - There is no way to invalidate the access tokens if a hacker successfully steals them. The hacker has full access for 15 minutes until the token is invalidated.
-  - Passwords need to be encrypted using bcrypt.
