@@ -23,6 +23,7 @@
 		if ($expiration != "") {
 			var i = Date.now()/1000;
 			var timer = setInterval(() => {
+				console.log($expiration)
 				if (i >= Number($expiration)) {
 					(async () => {
 						console.log("running async")
