@@ -55,7 +55,6 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// w.Header().Set("Access-Control-Allow-Origin", "jpoly1219devbox.xyz")
 	json.NewEncoder(w).Encode(user)
 }
 
