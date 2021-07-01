@@ -16,18 +16,30 @@ func ReturnAllPosts(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("returning all posts...")
 	var posts = make([]models.Post, 0)
 
-	results, err := models.Db.Query("SELECT * FROM posts;")
+	results, err := models.Db.Query("SELECT id, title, content FROM posts;")
 	if err != nil {
 		panic(err.Error())
 	}
-
 	for results.Next() {
 		var post models.Post
-		err := results.Scan(&post.Id, &post.Title, &post.Author, &post.Content)
+		err := results.Scan(&post.Id, &post.Title, &post.Content)
 		if err != nil {
 			panic(err.Error())
 		}
 		posts = append(posts, post)
+	}
+
+	nameResults, err := models.Db.Query("SELECT username FROM users INNER JOIN posts ON users.id = posts.author;")
+	if err != nil {
+		panic(err.Error())
+	}
+	index := 0
+	for nameResults.Next() {
+		err := nameResults.Scan(&posts[index].Author)
+		if err != nil {
+			panic(err.Error())
+		}
+		index++
 	}
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -39,14 +51,24 @@ func ReturnSinglePost(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	keys := vars["id"]
 
-	results, err := models.Db.Query(fmt.Sprintf("SELECT * FROM posts WHERE id = %s;", keys))
+	results, err := models.Db.Query(fmt.Sprintf("SELECT id, title, content FROM posts WHERE id = %s;", keys))
 	if err != nil {
 		panic(err.Error())
 	}
-
 	var post models.Post
 	for results.Next() {
-		err = results.Scan(&post.Id, &post.Title, &post.Author, &post.Content)
+		err = results.Scan(&post.Id, &post.Title, &post.Content)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+
+	nameResults, err := models.Db.Query(fmt.Sprintf("SELECT username FROM users INNER JOIN posts ON users.id = posts.author WHERE posts.id = %s;", keys))
+	if err != nil {
+		panic(err.Error())
+	}
+	for nameResults.Next() {
+		err := nameResults.Scan(&post.Author)
 		if err != nil {
 			panic(err.Error())
 		}
