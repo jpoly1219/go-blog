@@ -29,7 +29,7 @@
             {singlePost.content}
         </p>
     </div>
-    <button type="button" on:click={() => activePage.set("home")} class="border border-gray-500 rounded-lg p-3">
+    <button type="button" on:click={() => activePage.set("home")} class="border border-gray-500 rounded-lg p-3 flex-grow-0">
         <span class="mx-3 my-2">Go back to list</span>
     </button>
 </div>
