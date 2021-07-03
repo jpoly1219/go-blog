@@ -7,6 +7,7 @@
 	import Singlepost from "./Singlepost.svelte"
 	import Profile from "./Profile.svelte"
 	import Editprofile from "./Editprofile.svelte"
+	import Write from "./Write.svelte"
 	import { accessToken, activePage, expiration } from "./stores.js"
 
 	const pageMap = {
@@ -16,7 +17,8 @@
 		notfound: Notfound,
 		singlepost: Singlepost,
 		profile: Profile,
-		editprofile: Editprofile
+		editprofile: Editprofile,
+		write: Write
 	}
 
 	function refreshTimer() {
