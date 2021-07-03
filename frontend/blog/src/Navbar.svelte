@@ -34,6 +34,9 @@
                     <span class="mx-3 my-2 text-white">Sign up</span>
                 </button>
             {:else}
+            <div on:click={() => activePage.set("write")} class="flex items-center mr-5 text-base text-gray-900 cursor-pointer">
+                <span class="mx-3 my-2">Write</span>
+            </div>
             <div on:click={() => activePage.set("profile")} class="flex items-center mr-5 text-base text-gray-900 cursor-pointer">
                 <span class="mx-3 my-2">{username}</span>
             </div>
