@@ -16,7 +16,7 @@ func ReturnAllPosts(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("returning all posts...")
 	var posts = make([]models.Post, 0)
 
-	results, err := models.Db.Query("SELECT id, title, content FROM posts;")
+	results, err := models.Db.Query("SELECT id, title, content FROM posts ORDER BY id;")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -29,7 +29,7 @@ func ReturnAllPosts(w http.ResponseWriter, r *http.Request) {
 		posts = append(posts, post)
 	}
 
-	nameResults, err := models.Db.Query("SELECT username FROM users INNER JOIN posts ON users.id = posts.author;")
+	nameResults, err := models.Db.Query("SELECT username FROM users INNER JOIN posts ON users.id=posts.author ORDER BY id;")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -51,7 +51,10 @@ func ReturnSinglePost(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	keys := vars["id"]
 
-	results, err := models.Db.Query(fmt.Sprintf("SELECT id, title, content FROM posts WHERE id = %s;", keys))
+	results, err := models.Db.Query(
+		"SELECT id, title, content FROM posts WHERE id=?;",
+		keys,
+	)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -63,7 +66,10 @@ func ReturnSinglePost(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	nameResults, err := models.Db.Query(fmt.Sprintf("SELECT username FROM users INNER JOIN posts ON users.id = posts.author WHERE posts.id = %s;", keys))
+	nameResults, err := models.Db.Query(
+		"SELECT username FROM users INNER JOIN posts ON users.id=posts.author WHERE posts.id=?;",
+		keys,
+	)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -93,12 +99,24 @@ func CreateNewPost(w http.ResponseWriter, r *http.Request) {
 	var post models.Post
 	json.NewDecoder(r.Body).Decode(&post)
 
-	queryStr := fmt.Sprintf(
-		"INSERT INTO posts(title, author, content) VALUES ('%s', '%s', '%s');",
+	usernameToIdResults, err := models.Db.Query(
+		"SELECT id FROM users WHERE username=?;",
+		post.Author,
+	)
+	if err != nil {
+		panic(err.Error())
+	}
+	for usernameToIdResults.Next() {
+		err = usernameToIdResults.Scan(&post.Author)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+
+	results, err := models.Db.Query(
+		"INSERT INTO posts(title, author, content) VALUES (?, ?, ?);",
 		post.Title, post.Author, post.Content,
 	)
-
-	results, err := models.Db.Query(queryStr)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -131,12 +149,10 @@ func UpdatePost(w http.ResponseWriter, r *http.Request) {
 	var updatedPost models.Post
 	json.NewDecoder(r.Body).Decode(&updatedPost)
 
-	queryStr := fmt.Sprintf(
-		"UPDATE posts SET title = '%s', content = '%s' WHERE id = %s",
+	results, err := models.Db.Query(
+		"UPDATE posts SET title=?, content=? WHERE id=?;",
 		updatedPost.Title, updatedPost.Content, keys,
 	)
-
-	results, err := models.Db.Query(queryStr)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -167,7 +183,10 @@ func DeletePost(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	keys := vars["id"]
 
-	_, err = models.Db.Query(fmt.Sprintf("DELETE FROM posts WHERE id = %s", keys))
+	_, err = models.Db.Query(
+		"DELETE FROM posts WHERE id=?;",
+		keys,
+	)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -178,8 +197,10 @@ func ReturnUserData(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	keys := vars["username"]
 
-	queryStr := fmt.Sprintf("SELECT id, name, email, username FROM users WHERE username = '%s'", keys)
-	results, err := models.Db.Query(queryStr)
+	results, err := models.Db.Query(
+		"SELECT id, name, email, username FROM users WHERE username=?;",
+		keys,
+	)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -201,7 +222,10 @@ func ReturnUserPosts(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	keys := vars["userid"]
 
-	results, err := models.Db.Query(fmt.Sprintf("SELECT * FROM posts WHERE author = %s;", keys))
+	results, err := models.Db.Query(
+		"SELECT * FROM posts WHERE author=?;",
+		keys,
+	)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -214,6 +238,19 @@ func ReturnUserPosts(w http.ResponseWriter, r *http.Request) {
 			panic(err.Error())
 		}
 		posts = append(posts, post)
+	}
+
+	nameResults, err := models.Db.Query("SELECT username FROM users INNER JOIN posts ON users.id=posts.author;")
+	if err != nil {
+		panic(err.Error())
+	}
+	index := 0
+	for nameResults.Next() {
+		err := nameResults.Scan(&posts[index].Author)
+		if err != nil {
+			panic(err.Error())
+		}
+		index++
 	}
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -238,11 +275,10 @@ func EditUserData(w http.ResponseWriter, r *http.Request) {
 	var updatedUser models.User
 	json.NewDecoder(r.Body).Decode(&updatedUser)
 
-	queryStr := fmt.Sprintf(
-		"UPDATE users SET name = '%s', email = '%s', password = '%s' WHERE id = %s",
+	results, err := models.Db.Query(
+		"UPDATE users SET name=?, email=?, password=? WHERE id=?;",
 		updatedUser.Name, updatedUser.Email, updatedUser.Password, keys,
 	)
-	results, err := models.Db.Query(queryStr)
 	if err != nil {
 		panic(err.Error())
 	}
