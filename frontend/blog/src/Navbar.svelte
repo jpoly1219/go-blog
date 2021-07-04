@@ -15,7 +15,7 @@
     beforeUpdate(() => {
         if ($authenticated == true) {
             let payloadB64 = $accessToken.split(".")[1]
-            username = JSON.parse(window.atob(payloadB64)).user_name
+            username = JSON.parse(window.atob(payloadB64)).user_username
         }
     })
 </script>
