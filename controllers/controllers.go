@@ -16,7 +16,7 @@ func ReturnAllPosts(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("returning all posts...")
 	var posts = make([]models.Post, 0)
 
-	results, err := models.Db.Query("SELECT id, title, content FROM posts ORDER BY id;")
+	results, err := models.Db.Query("SELECT id, title, content FROM posts ORDER BY id DESC;")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -29,17 +29,19 @@ func ReturnAllPosts(w http.ResponseWriter, r *http.Request) {
 		posts = append(posts, post)
 	}
 
-	nameResults, err := models.Db.Query("SELECT username FROM users INNER JOIN posts ON users.id=posts.author ORDER BY id;")
+	nameResults, err := models.Db.Query("SELECT username FROM users INNER JOIN posts ON users.id=posts.author ORDER BY posts.id DESC;")
 	if err != nil {
 		panic(err.Error())
 	}
 	index := 0
 	for nameResults.Next() {
-		err := nameResults.Scan(&posts[index].Author)
-		if err != nil {
-			panic(err.Error())
+		if index < len(posts) {
+			err := nameResults.Scan(&posts[index].Author)
+			if err != nil {
+				panic(err.Error())
+			}
+			index++
 		}
-		index++
 	}
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -223,7 +225,7 @@ func ReturnUserPosts(w http.ResponseWriter, r *http.Request) {
 	keys := vars["userid"]
 
 	results, err := models.Db.Query(
-		"SELECT * FROM posts WHERE author=?;",
+		"SELECT * FROM posts WHERE author=? ORDER BY id DESC;",
 		keys,
 	)
 	if err != nil {
@@ -240,17 +242,19 @@ func ReturnUserPosts(w http.ResponseWriter, r *http.Request) {
 		posts = append(posts, post)
 	}
 
-	nameResults, err := models.Db.Query("SELECT username FROM users INNER JOIN posts ON users.id=posts.author;")
+	nameResults, err := models.Db.Query("SELECT username FROM users INNER JOIN posts ON users.id=posts.author ORDER BY posts.id DESC;")
 	if err != nil {
 		panic(err.Error())
 	}
 	index := 0
 	for nameResults.Next() {
-		err := nameResults.Scan(&posts[index].Author)
-		if err != nil {
-			panic(err.Error())
+		if index < len(posts) {
+			err := nameResults.Scan(&posts[index].Author)
+			if err != nil {
+				panic(err.Error())
+			}
+			index++
 		}
-		index++
 	}
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
