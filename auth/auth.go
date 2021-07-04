@@ -38,12 +38,10 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 	passwordHashStr := string(passwordHashByte)
 
-	queryStr := fmt.Sprintf(
-		"INSERT INTO users(name, email, username, password) VALUES('%s', '%s', '%s', '%s')",
+	results, err := models.Db.Query(
+		"INSERT INTO users(name, email, username, password) VALUES(?, ?, ?, ?);",
 		user.Name, user.Email, user.Username, passwordHashStr,
 	)
-	fmt.Println(queryStr)
-	results, err := models.Db.Query(queryStr)
 	if err != nil {
 		fmt.Println("query failed")
 	}
@@ -67,11 +65,10 @@ func LogIn(w http.ResponseWriter, r *http.Request) {
 	var user models.User
 	json.NewDecoder(r.Body).Decode(&user)
 
-	queryStr := fmt.Sprintf(
-		"SELECT * FROM users WHERE email = '%s'",
+	results, err := models.Db.Query(
+		"SELECT * FROM users WHERE email=?;",
 		user.Email,
 	)
-	results, err := models.Db.Query(queryStr)
 	if err != nil {
 		fmt.Println("query failed")
 	}
@@ -163,6 +160,7 @@ func generateToken(id, name, email, username interface{}) (*models.Token, error)
 
 func ExtractToken(r *http.Request) string {
 	tokenHeaderStr := r.Header.Get("Authorization")
+	fmt.Println(tokenHeaderStr)
 	strSlice := strings.Split(tokenHeaderStr, " ")
 	var tokenStr string
 	if len(strSlice) == 2 {
@@ -246,11 +244,10 @@ func Refresh(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// query the user and use that data as parameters for generating new tokens
-	queryStr := fmt.Sprintf(
-		"SELECT * FROM users WHERE id = '%s' AND username = '%s'",
+	results, err := models.Db.Query(
+		"SELECT * FROM users WHERE id=? AND username=?;",
 		refreshId, refreshUsername,
 	)
-	results, err := models.Db.Query(queryStr)
 	if err != nil {
 		fmt.Println("query failed")
 	}
