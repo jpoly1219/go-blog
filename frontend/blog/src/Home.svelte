@@ -8,6 +8,7 @@
 	onMount(async () => {
 		const res = await fetch(apiURL)
 		postList = await res.json()
+		console.log(postList)
 	})
 </script>
 
