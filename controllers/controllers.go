@@ -242,7 +242,10 @@ func ReturnUserPosts(w http.ResponseWriter, r *http.Request) {
 		posts = append(posts, post)
 	}
 
-	nameResults, err := models.Db.Query("SELECT username FROM users INNER JOIN posts ON users.id=posts.author ORDER BY posts.id DESC;")
+	nameResults, err := models.Db.Query(
+		"SELECT username FROM users INNER JOIN posts ON users.id=posts.author WHERE author=?;",
+		keys,
+	)
 	if err != nil {
 		panic(err.Error())
 	}
