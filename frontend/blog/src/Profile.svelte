@@ -1,7 +1,7 @@
 <script>
     import { onMount } from "svelte"
     import Post from "./Post.svelte"
-    import { currentUser } from "./stores";
+    import { viewUser } from "./stores";
 
     let userId
 	let userData = {
@@ -12,7 +12,7 @@
     let postData = []
 
 	onMount(async () => {
-		const res = await fetch("http://jpoly1219devbox.xyz:8090/"+$currentUser)
+		const res = await fetch("http://jpoly1219devbox.xyz:8090/"+$viewUser)
 		userData = await res.json()
         userId = userData.id.toString()
         
