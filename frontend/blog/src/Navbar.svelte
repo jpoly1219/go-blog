@@ -1,6 +1,6 @@
 <script>
     import { beforeUpdate } from "svelte";
-    import { authenticated, accessToken, activePage, currentUser, expiration, postId } from "./stores.js"
+    import { authenticated, accessToken, activePage, currentUser, expiration, postId, viewUser } from "./stores.js"
 
     function logout() {
         authenticated.set(false)
@@ -9,6 +9,11 @@
         currentUser.set("")
         activePage.set("home")
         postId.set("")
+    }
+
+    function userProfileRedirect() {
+        viewUser.set($currentUser)
+        activePage.set("profile")
     }
 
     let username = ""
@@ -37,7 +42,7 @@
             <div on:click={() => activePage.set("write")} class="flex items-center mr-5 text-base text-gray-900 cursor-pointer">
                 <span class="mx-3 my-2">Write</span>
             </div>
-            <div on:click={() => activePage.set("profile")} class="flex items-center mr-5 text-base text-gray-900 cursor-pointer">
+            <div on:click={userProfileRedirect} class="flex items-center mr-5 text-base text-gray-900 cursor-pointer">
                 <span class="mx-3 my-2">{username}</span>
             </div>
                 <button on:click={logout} class="inline-flex items-center bg-blue-400 border rounded-lg text-base">
