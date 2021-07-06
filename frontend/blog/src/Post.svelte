@@ -1,6 +1,4 @@
 <script>
-import { onMount } from "svelte";
-
     import { activePage, postId, viewUser } from "./stores"
     export let post
     
