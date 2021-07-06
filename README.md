@@ -35,17 +35,18 @@ The project is meant to be kept bare-bones and minimal. I am trying not to use f
   - Clicking on a post title links to a page dedicated for that single post.
   - Clicking on the username in the navbar after login redirects to the user profile page.
   - Each post component shows the title, author and the content of the post.
+  - Users can write their own posts.
+  - Posts are shortened in the homepage if they exceed around 100 words or so.
 - Security
   - Passwords are hashed using bcrypt.
 
 ## Features to work on
 - Frontend
-  - Posts are shortened in the homepage if they exceed around 100 words or so.
   - Pagination
     - It's a bad idea to load every post from the database, so there needs to be a way to load x amount of posts at a time.
-    - I may have an infinitely scrolling page that loads posts as the user scrolls down.
-    - Or I may just have a next page button to load set amount of posts per page.
-  - Users can write their own posts.
+    - Have an infinitely scrolling page that loads posts as the user scrolls down.
+    - MySQL LIMIT, GROUP BY keywords can be handy.
+
 - User authentication
   - If the user decides to log in from different devices, then the access token for one device has to be shared across other devices. This might be a better design than having to generate x amount of tokens for each device.
 - Security
