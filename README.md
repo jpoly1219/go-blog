@@ -46,6 +46,11 @@ The project is meant to be kept bare-bones and minimal. I am trying not to use f
     - It's a bad idea to load every post from the database, so there needs to be a way to load x amount of posts at a time.
     - Have an infinitely scrolling page that loads posts as the user scrolls down.
     - MySQL LIMIT, GROUP BY keywords can be handy.
+    - Have a store called `page`, and whenever the user scrolls to the bottom of the screen, increment this value by 1.
+    - This value will be sent back to the backend to load the next batch of posts.
+      - Each batch consists of 10 posts.
+      - SELECT * FROM posts ORDER BY id DESC LIMIT 0, 10;
+      - SELECT * FROM posts ORDER BY id DESC LIMIT 10, 10; ...
 
 - User authentication
   - If the user decides to log in from different devices, then the access token for one device has to be shared across other devices. This might be a better design than having to generate x amount of tokens for each device.
