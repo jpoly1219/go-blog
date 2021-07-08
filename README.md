@@ -51,6 +51,7 @@ The project is meant to be kept bare-bones and minimal. I am trying not to use f
       - Each batch consists of 10 posts.
       - SELECT * FROM posts ORDER BY id DESC LIMIT 0, 10;
       - SELECT * FROM posts ORDER BY id DESC LIMIT 10, 10; ...
+      - If the range becomes out of bound (eg LIMIT 10, 10 but there are only two elements left), MySQL just stops after selecting what's left.
 
 - User authentication
   - If the user decides to log in from different devices, then the access token for one device has to be shared across other devices. This might be a better design than having to generate x amount of tokens for each device.
