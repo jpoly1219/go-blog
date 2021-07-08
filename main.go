@@ -41,6 +41,7 @@ func main() {
 
 	r := mux.NewRouter()
 	r.HandleFunc("/posts", controllers.ReturnAllPosts).Methods(http.MethodGet)
+	r.HandleFunc("/posts/batch/{id}", controllers.ReturnBatchPosts).Methods(http.MethodGet)
 	r.HandleFunc("/posts/{id}", controllers.ReturnSinglePost).Methods(http.MethodGet)
 	r.HandleFunc("/posts/{id}", controllers.UpdatePost).Methods(http.MethodOptions, http.MethodPut)
 	r.HandleFunc("/posts/{id}", controllers.DeletePost).Methods(http.MethodOptions, http.MethodDelete)
