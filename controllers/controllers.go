@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/jpoly1219/go-blog/auth"
 	"github.com/jpoly1219/go-blog/models"
@@ -44,6 +45,48 @@ func ReturnAllPosts(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	json.NewEncoder(w).Encode(posts)
+}
+
+func ReturnBatchPosts(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	keys := vars["id"]
+	fmt.Printf("returning batch %s\n", keys)
+
+	keysInt, _ := strconv.Atoi(keys)
+	results, err := models.Db.Query(
+		"SELECT id, title, content FROM posts ORDER BY id DESC LIMIT ?, 5;",
+		keysInt,
+	)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	var posts = make([]models.Post, 0)
+	for results.Next() {
+		var post models.Post
+		err := results.Scan(&post.Id, &post.Title, &post.Content)
+		if err != nil {
+			panic(err.Error())
+		}
+		posts = append(posts, post)
+	}
+
+	nameResults, err := models.Db.Query("SELECT username FROM users INNER JOIN posts ON users.id=posts.author ORDER BY posts.id DESC;")
+	if err != nil {
+		panic(err.Error())
+	}
+	index := 0
+	for nameResults.Next() {
+		if index < len(posts) {
+			err := nameResults.Scan(&posts[index].Author)
+			if err != nil {
+				panic(err.Error())
+			}
+			index++
+		}
+	}
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	json.NewEncoder(w).Encode(posts)
 }
