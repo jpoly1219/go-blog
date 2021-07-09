@@ -1,5 +1,6 @@
 <script>
     import { activePage, postId, viewUser } from "./stores"
+    import { fade } from "svelte/transition"
     export let post
     
     function setPostId() {
@@ -31,7 +32,7 @@
 
 </script>
 
-<div class="border-b-2">
+<div in:fade class="border-b-2">
     <h2 on:click={setPostId} class="text-2xl font-medium text-gray-900 mt-4 mb-4 cursor-pointer">
         {post.title}
     </h2>
