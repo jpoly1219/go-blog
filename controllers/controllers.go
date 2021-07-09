@@ -57,7 +57,7 @@ func ReturnBatchPosts(w http.ResponseWriter, r *http.Request) {
 	keysInt, _ := strconv.Atoi(keys)
 	results, err := models.Db.Query(
 		"SELECT id, title, content FROM posts ORDER BY id DESC LIMIT ?, 5;",
-		keysInt,
+		keysInt*5,
 	)
 	if err != nil {
 		panic(err.Error())
