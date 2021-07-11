@@ -1,6 +1,6 @@
 <script>
     import { onMount } from "svelte"
-    import { activePage, postId } from "./stores"
+    import { activePage, authenticated, postId } from "./stores"
 
     let singlePost = {
         title: "",
@@ -29,6 +29,11 @@
             {singlePost.content}
         </p>
     </div>
+    {#if $authenticated == true}
+        <button type="button" on:click={() => activePage.set("write")} class="bg-blue-400 rounded-lg p-3 flex-grow-0">
+            <span class="mx-3 my-2 text-white">Edit post</span>
+        </button>
+    {/if}
     <button type="button" on:click={() => activePage.set("home")} class="border border-gray-500 rounded-lg p-3 flex-grow-0">
         <span class="mx-3 my-2">Go back to list</span>
     </button>
