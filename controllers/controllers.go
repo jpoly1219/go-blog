@@ -238,6 +238,11 @@ func DeletePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func ReturnUserData(w http.ResponseWriter, r *http.Request) {
+	auth.HandleCors(w, r)
+	if r.Method == "OPTIONS" {
+		return
+	}
+
 	fmt.Println("returning user data...")
 	vars := mux.Vars(r)
 	keys := vars["username"]
@@ -258,11 +263,16 @@ func ReturnUserData(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	// w.Header().Set("Access-Control-Allow-Origin", "*")
 	json.NewEncoder(w).Encode(user)
 }
 
 func ReturnUserPosts(w http.ResponseWriter, r *http.Request) {
+	auth.HandleCors(w, r)
+	if r.Method == "OPTIONS" {
+		return
+	}
+
 	fmt.Println("returning this user's post...")
 	vars := mux.Vars(r)
 	keys := vars["userid"]
@@ -303,7 +313,7 @@ func ReturnUserPosts(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	// w.Header().Set("Access-Control-Allow-Origin", "*")
 	json.NewEncoder(w).Encode(posts)
 }
 
