@@ -12,13 +12,15 @@
     let postData = []
 
 	onMount(async () => {
-		const res = await fetch("http://jpoly1219devbox.xyz:8090/"+$viewUser)
-		userData = await res.json()
-        userId = userData.id.toString()
-        
-        const res2 = await fetch("http://jpoly1219devbox.xyz:8090/"+userId+"/posts")
-        postData = await res2.json()
-        console.log(postData)
+        if ($viewUser != "") {
+            const res = await fetch("http://jpoly1219devbox.xyz:8090/"+$viewUser)
+            userData = await res.json()
+            userId = userData.id.toString()
+            
+            const res2 = await fetch("http://jpoly1219devbox.xyz:8090/"+userId+"/posts")
+            postData = await res2.json()
+            console.log(postData)
+        }
 	})
 </script>
 

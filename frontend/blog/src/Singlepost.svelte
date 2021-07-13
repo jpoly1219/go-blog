@@ -1,6 +1,6 @@
 <script>
     import { onMount } from "svelte"
-    import { activePage, authenticated, postId } from "./stores"
+    import { activePage, authenticated, postId, postToEdit } from "./stores"
 
     let singlePost = {
         title: "",
@@ -15,6 +15,11 @@
         const res = await fetch(apiURL)
         singlePost = await res.json()
     })
+
+    function handleClick() {
+        postToEdit.set(singlePost)
+        activePage.set("editpost")
+    }
 </script>
 
 <div class="container mx-auto px-96 pb-10 flex flex-col">
@@ -30,7 +35,7 @@
         </p>
     </div>
     {#if $authenticated == true}
-        <button type="button" on:click={() => activePage.set("write")} class="bg-blue-400 rounded-lg p-3 flex-grow-0">
+        <button type="button" on:click={handleClick} class="bg-blue-400 rounded-lg p-3 flex-grow-0">
             <span class="mx-3 my-2 text-white">Edit post</span>
         </button>
     {/if}
