@@ -16,9 +16,23 @@
         singlePost = await res.json()
     })
 
-    function handleClick() {
+    function handleEdit() {
         postToEdit.set(singlePost)
         activePage.set("editpost")
+    }
+
+    let clickedDelete = false;
+    function handleDelete() {
+        if (!clickedDelete) {
+            clickedDelete = true;
+        }
+    }
+    function handleDeleteConfirm() {
+        alert("post deleted!")
+        clickedDelete = false;
+    }
+    function handleDeleteCancel() {
+        clickedDelete = false;
     }
 </script>
 
@@ -35,9 +49,21 @@
         </p>
     </div>
     {#if $authenticated == true}
-        <button type="button" on:click={handleClick} class="bg-blue-400 rounded-lg p-3 flex-grow-0">
+        <button type="button" on:click={handleEdit} class="bg-blue-400 rounded-lg p-3 flex-grow-0">
             <span class="mx-3 my-2 text-white">Edit post</span>
         </button>
+        <button type="button" on:click={handleDelete} class="bg-red-400 rounded-lg p-3 flex-grow-0">
+            <span class="mx-3 my-2 text-white">Delete post</span>
+        </button>
+        {#if clickedDelete}
+        <div class="px-4 py-3 leading-normal text-white bg-red-700 rounded-lg" role="alert">
+            <p>Are you sure you want to delete this post?</p>
+            <div class="flex flex-row">
+                <span on:click={handleDeleteConfirm} class="mx-2 my-1">Yes</span>
+                <span on:click={handleDeleteCancel} class="mx-2 my-1">No</span>
+            </div>
+        </div>
+        {/if}
     {/if}
     <button type="button" on:click={() => activePage.set("home")} class="border border-gray-500 rounded-lg p-3 flex-grow-0">
         <span class="mx-3 my-2">Go back to list</span>
