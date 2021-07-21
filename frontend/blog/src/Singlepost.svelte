@@ -1,6 +1,6 @@
 <script>
     import { onMount } from "svelte"
-    import { activePage, authenticated, postId, postToEdit } from "./stores"
+    import { accessToken, activePage, authenticated, postId, postToEdit } from "./stores"
 
     let singlePost = {
         title: "",
@@ -27,9 +27,19 @@
             clickedDelete = true;
         }
     }
-    function handleDeleteConfirm() {
+    async function handleDeleteConfirm() {
+        const options = {
+            method: "DELETE",
+            headers: {
+                "Authorization": "Bearer " + $accessToken
+            },
+            credentials: "include"
+        }
+        const res = await fetch("http://jpoly1219devbox.xyz:8090/posts/"+$postId, options)
+
         alert("post deleted!")
         clickedDelete = false;
+        activePage.set("profile")
     }
     function handleDeleteCancel() {
         clickedDelete = false;
