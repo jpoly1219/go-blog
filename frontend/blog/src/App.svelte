@@ -10,6 +10,7 @@
 	import Write from "./Write.svelte"
 	import Editpost from "./Editpost.svelte"
 	import { accessToken, activePage, expiration } from "./stores.js"
+	import { onMount } from "svelte";
 
 	const pageMap = {
 		home: Home,
@@ -29,25 +30,36 @@
 	// if doesn't exist OR exists but invalid, use refresh token to get new refresh and access tokens
 	// if refresh token is invalid, user has to manually log in
 
+	async function refresh() {
+		const options = {
+			method: "POST",
+			credentials: "include"
+		}
+		try {
+			const res = await fetch("http://jpoly1219devbox.xyz:8090/auth/refresh", options)
+			const json = await res.json()
+			accessToken.set(json.accessToken)
+			let payloadB64 = $accessToken.split(".")[1]
+			expiration.set(JSON.parse(window.atob(payloadB64)).exp)
+		} catch(err) {
+			alert(err)
+		}
+	}
+
+	onMount(() => {
+		let at = $accessToken
+		if (at == "") {
+			refresh()
+		}
+	})
+
 	function refreshTimer() {
 		if ($expiration != "") {
 			var i = Date.now()/1000;
 			var timer = setInterval(() => {
 				console.log($expiration)
 				if (i >= Number($expiration)) {
-					(async () => {
-						console.log("running async")
-						const options = {
-							method: "POST",
-							credentials: "include"
-						}
-						const res = await fetch("http://jpoly1219devbox.xyz:8090/auth/refresh", options)
-						const json = await res.json()
-						accessToken.set(json.accessToken)
-						console.log($accessToken)
-						let payloadB64 = $accessToken.split(".")[1]
-						expiration.set(JSON.parse(window.atob(payloadB64)).exp)
-					})()
+					refresh()
 					clearInterval(timer)
 				}	
 				console.log(Date.now()/1000)
