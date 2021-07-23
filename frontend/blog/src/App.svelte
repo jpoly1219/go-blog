@@ -23,6 +23,12 @@
 		editpost: Editpost
 	}
 
+	// onMount (so basically on reload or close/reopen tab)
+	// try silent refresh: check for access token in stores.js
+	// if exists and is valid, use that
+	// if doesn't exist OR exists but invalid, use refresh token to get new refresh and access tokens
+	// if refresh token is invalid, user has to manually log in
+
 	function refreshTimer() {
 		if ($expiration != "") {
 			var i = Date.now()/1000;
