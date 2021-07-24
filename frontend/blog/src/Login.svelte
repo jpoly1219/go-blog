@@ -31,6 +31,8 @@
             let payloadB64 = $accessToken.split(".")[1]
             expiration.set(JSON.parse(window.atob(payloadB64)).exp)
             currentUser.set(JSON.parse(window.atob(payloadB64)).user_name)
+            localStorage.setItem("user", $currentUser)
+            localStorage.setItem("authenticated", $authenticated)
             console.log("expiration: " + $expiration)
         }
         else {
