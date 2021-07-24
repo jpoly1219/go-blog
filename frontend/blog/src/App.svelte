@@ -9,8 +9,8 @@
 	import Editprofile from "./Editprofile.svelte"
 	import Write from "./Write.svelte"
 	import Editpost from "./Editpost.svelte"
-	import { accessToken, activePage, expiration } from "./stores.js"
-	import { onMount } from "svelte";
+	import { accessToken, activePage, authenticated, currentUser, expiration } from "./stores.js"
+	import { afterUpdate, onMount } from "svelte";
 
 	const pageMap = {
 		home: Home,
@@ -41,15 +41,21 @@
 			accessToken.set(json.accessToken)
 			let payloadB64 = $accessToken.split(".")[1]
 			expiration.set(JSON.parse(window.atob(payloadB64)).exp)
+			authenticated.set(true)
 		} catch(err) {
 			alert(err)
 		}
 	}
 
 	onMount(() => {
+		let user = localStorage.getItem("user")
 		let at = $accessToken
-		if (at == "") {
-			refresh()
+		console.log(user)
+		if (user != null) {
+			if (at == "") {
+				console.log("refreshing")
+				refresh()
+			}
 		}
 	})
 
@@ -59,8 +65,10 @@
 			var timer = setInterval(() => {
 				console.log($expiration)
 				if (i >= Number($expiration)) {
-					refresh()
-					clearInterval(timer)
+					if (localStorage.getItem("user") != null) {
+						refresh()
+						clearInterval(timer)
+					}
 				}	
 				console.log(Date.now()/1000)
 				i++
