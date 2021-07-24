@@ -1,8 +1,9 @@
 <script>
-    import { beforeUpdate } from "svelte";
+    import { beforeUpdate, afterUpdate, onMount } from "svelte";
     import { authenticated, accessToken, activePage, currentUser, expiration, postId, viewUser } from "./stores.js"
 
     function logout() {
+        localStorage.clear()
         authenticated.set(false)
         accessToken.set("")
         expiration.set("")
@@ -17,10 +18,14 @@
     }
 
     let username = ""
-    beforeUpdate(() => {
+    afterUpdate(() => {
         if ($authenticated == true) {
-            let payloadB64 = $accessToken.split(".")[1]
-            username = JSON.parse(window.atob(payloadB64)).user_username
+            if (localStorage.getItem("user") != null) {
+                let payloadB64 = $accessToken.split(".")[1]
+                // username = JSON.parse(window.atob(payloadB64)).user_username 
+                username = localStorage.getItem("user")
+                console.log("username: " + username)
+            }
         }
     })
 </script>
@@ -38,13 +43,13 @@
                 <button on:click={() => activePage.set("signup")} class="inline-flex items-center bg-blue-400 border rounded-lg text-base">
                     <span class="mx-3 my-2 text-white">Sign up</span>
                 </button>
-            {:else}
-            <div on:click={() => activePage.set("write")} class="flex items-center mr-5 text-base text-gray-900 cursor-pointer">
-                <span class="mx-3 my-2">Write</span>
-            </div>
-            <div on:click={userProfileRedirect} class="flex items-center mr-5 text-base text-gray-900 cursor-pointer">
-                <span class="mx-3 my-2">{username}</span>
-            </div>
+            {:else if $authenticated == true}
+                <div on:click={() => activePage.set("write")} class="flex items-center mr-5 text-base text-gray-900 cursor-pointer">
+                    <span class="mx-3 my-2">Write</span>
+                </div>
+                <div on:click={userProfileRedirect} class="flex items-center mr-5 text-base text-gray-900 cursor-pointer">
+                    <span class="mx-3 my-2">{username}</span>
+                </div>
                 <button on:click={logout} class="inline-flex items-center bg-blue-400 border rounded-lg text-base">
                     <span class="mx-3 my-2 text-white">Log out</span>
                 </button>
